@@ -5,5 +5,9 @@ date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 ---
 
-# Down the rabbit-hole
+# Introduction
+
+The goal of this project is to track memory decline in Alzheimer’s disease and dementia using the model-based, adaptive SlimStampen system. This markdown file contains visualizations of Rates of Forgetting.
+
+Memory loss is a debilitating symptom of neurodegenerative diseases. Current assessment tools, however, lack the reliable, convenient, and repeatable qualities needed to capture the individualized and evolving nature of memory decline. This project uses neurocomputational models to track and predict memory decline in subjectively- or mildly-cognitively impaired (MCI) individuals. MCI = Functional capacity is relatively intact, but on objective testing, show cognitive decline in at least one area of neuropsychological functioning.
 
