@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title> 3 A caucus-race and a long tale | Tracking memory decline</title>
-  <meta name="description" content=" 3 A caucus-race and a long tale | Tracking memory decline" />
+  <title> 3 Results | Tracking memory decline</title>
+  <meta name="description" content=" 3 Results | Tracking memory decline" />
   <meta name="generator" content="bookdown 0.27 and GitBook 2.6.7" />
 
-  <meta property="og:title" content=" 3 A caucus-race and a long tale | Tracking memory decline" />
+  <meta property="og:title" content=" 3 Results | Tracking memory decline" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content=" 3 A caucus-race and a long tale | Tracking memory decline" />
+  <meta name="twitter:title" content=" 3 Results | Tracking memory decline" />
   
   
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="the-pool-of-tears.html"/>
-
+<link rel="prev" href="methods.html"/>
+<link rel="next" href="average-accuracy.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -72,9 +72,19 @@
 <li><a href="./">Tracking Memory Decline</a></li>
 
 <li class="divider"></li>
-<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
-<li class="chapter" data-level="2" data-path="the-pool-of-tears.html"><a href="the-pool-of-tears.html"><i class="fa fa-check"></i><b>2</b> The pool of tears</a></li>
-<li class="chapter" data-level="3" data-path="a-caucus-race-and-a-long-tale.html"><a href="a-caucus-race-and-a-long-tale.html"><i class="fa fa-check"></i><b>3</b> A caucus-race and a long tale</a></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#goal"><i class="fa fa-check"></i><b>1.1</b> Goal</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#background"><i class="fa fa-check"></i><b>1.2</b> Background</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="methods.html"><a href="methods.html"><i class="fa fa-check"></i><b>2</b> Methods</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="methods.html"><a href="methods.html#rate-of-forgetting"><i class="fa fa-check"></i><b>2.1</b> Rate of Forgetting</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="results.html"><a href="results.html"><i class="fa fa-check"></i><b>3</b> Results</a></li>
+<li class="chapter" data-level="4" data-path="average-accuracy.html"><a href="average-accuracy.html"><i class="fa fa-check"></i><b>4</b> Average Accuracy</a></li>
+<li class="chapter" data-level="5" data-path="the-pool-of-tears.html"><a href="the-pool-of-tears.html"><i class="fa fa-check"></i><b>5</b> The pool of tears</a></li>
+<li class="chapter" data-level="6" data-path="a-caucus-race-and-a-long-tale.html"><a href="a-caucus-race-and-a-long-tale.html"><i class="fa fa-check"></i><b>6</b> A caucus-race and a long tale</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
 </ul>
@@ -94,17 +104,31 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="a-caucus-race-and-a-long-tale" class="section level1 hasAnchor" number="3">
-<h1><span class="header-section-number"> 3</span> A caucus-race and a long tale<a href="a-caucus-race-and-a-long-tale.html#a-caucus-race-and-a-long-tale" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-
+<div id="results" class="section level1 hasAnchor" number="3">
+<h1><span class="header-section-number"> 3</span> Results<a href="results.html#results" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<pre><code>## `summarise()` has grouped output by &#39;userId&#39;, &#39;lessonTitle&#39;, &#39;lessonId&#39;. You
+## can override using the `.groups` argument.
+## `summarise()` has grouped output by &#39;lessonId&#39;, &#39;userId&#39;. You can override
+## using the `.groups` argument.
+## Joining, by = c(&quot;userId&quot;, &quot;lessonId&quot;, &quot;sessionId&quot;)
+## `summarise()` has grouped output by &#39;userId&#39;, &#39;lessonTitle&#39;. You can override
+## using the `.groups` argument.
+## `summarise()` has grouped output by &#39;userId&#39;, &#39;sessionId&#39;, &#39;lessonId&#39;. You can
+## override using the `.groups` argument.
+## Joining, by = c(&quot;userId&quot;, &quot;sessionId&quot;, &quot;lessonId&quot;, &quot;lessonTitle&quot;, &quot;duration&quot;,
+## &quot;start&quot;, &quot;legit&quot;, &quot;sessionRank&quot;)
+## Joining, by = &quot;userId&quot;
+## Joining, by = c(&quot;userId&quot;, &quot;lessonTitle&quot;, &quot;lessonId&quot;, &quot;sessionId&quot;)
+## `summarise()` has grouped output by &#39;lessonTitle&#39;. You can override using the
+## `.groups` argument.</code></pre>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="the-pool-of-tears.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="methods.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="average-accuracy.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -135,7 +159,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/hollyhake/wonderland/edit/master/03-race.Rmd",
+"link": "https://github.com/hollyhake/wonderland/edit/master/index.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -143,7 +167,7 @@ gitbook.start({
 "text": null
 },
 "view": {
-"link": "https://github.com/hollyhake/wonderland/blob/master/03-race.Rmd",
+"link": "https://github.com/hollyhake/wonderland/blob/master/index.Rmd",
 "text": null
 },
 "download": null,
