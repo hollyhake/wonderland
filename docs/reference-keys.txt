@@ -12,3 +12,10 @@ memory-task
 accuracy
 rate-of-forgetting-1
 references
+mean-rate-of-forgetting
+median-rate-of-forgetting
+response-time
+rate-of-forgetting-distribution
+statistics
+classification-accuracy
+single-session
