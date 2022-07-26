@@ -98,7 +98,9 @@ data <- data %>%
   calculate_repetition() %>%
   calculate_alpha_and_activation(maxAlpha=MAX_ALPHA)
 
+```
 
+```{r}
 # Calculate avg alpha
 data_lastRep <- data %>%
   group_by(lessonId, userId, sessionId, factId) %>%
@@ -165,6 +167,10 @@ clinical <- clinical %>%
 # Order the lessons by week
 level_order<- factor(clinical$lessonTitle, level = c('01 Practice','Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers'))
 
+# Delete practice
+clinical <- clinical[!(clinical$lessonTitle=="01 Practice"), ]
+level_order<- factor(clinical$lessonTitle, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers'))
+
 
 ```
 
@@ -193,7 +199,7 @@ ggplotly(graph.clinical, tooltip=c("y", "text"), height=450, width=800) %>%
 ```
 
 This graph lets you interact with the data points to get a better look at the
-accuracy scores for each of the individual subjects.
+accuracy scores for each of the individual participant.
 
 ```{r, Accuracy by Participant, echo=FALSE}
 
@@ -206,6 +212,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=correct, text=paste0(userId
   ylab("Mean Accuracy") +
   ylim(0.25,1.0) +
   ggtitle("Accuracy by Participant") +
+  labs(fill="Participant") +
   theme_pander() +
   theme()
 
@@ -214,7 +221,7 @@ ggplotly(graph.clinical, tooltip=c("y", "text"), height=450, width=800) %>%
 
 ```
 
-This graph separates the subjects by clinical status. 
+This graph separates the participants by clinical status. 
 
 ```{r, Accuracy by Clinical Status, echo=FALSE}
 
@@ -229,6 +236,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=correct, col=clinicalStatus
   ylab("Mean Accuracy") +
   ylim(0.35,1.0) +
   ggtitle("Accuracy by Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
   theme_pander() +
   theme()
   
@@ -275,6 +283,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=Meanalpha, text=paste0(user
   ylab("Mean Rate of forgetting") +
   ylim(0.25,0.5) +
   ggtitle("Rate of Forgetting by Participant") +
+  labs(fill="Participant") +
   theme_pander() +
   theme()
 
@@ -299,6 +308,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=Meanalpha,col=clinicalStatu
   ylab("Mean Rate of Forgetting") +
   ylim(0.25,0.5) +
   ggtitle("Rate of Forgetting by Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
   theme_pander() +
   theme()
 
@@ -391,6 +401,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=Medianalpha, text=paste0(us
   ylab("Median Rate of forgetting") +
   ylim(0.25,0.5) +
   ggtitle("Rate of Forgetting by Participant") +
+  labs(fill="Participant") +
   theme_pander() +
   theme()
 
@@ -415,6 +426,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=Medianalpha,col=clinicalSta
   ylab("Median Rate of Forgetting") +
   ylim(0.25,0.5) +
   ggtitle("Rate of Forgetting by Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
   theme_pander() +
   theme()
 
@@ -495,7 +507,7 @@ ggplotly(graph.clinical, tooltip=c("y", "text"), height=450, width=800) %>%
 ```
 
 This graph lets you interact with the data points to get a better look at the
-Response Time scores for each of the individual subjects.
+Response Time scores for each of the individual participant.
 
 ```{r, Response Time by Participant, echo=FALSE}
 
@@ -507,6 +519,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=responseTime, text=paste0(u
   xlab("Lesson") +
   ylab("Mean Response Time") +
   ggtitle("Response Time by Participant") +
+  labs(fill="Participant") +
   theme_pander() +
   theme()
 
@@ -515,7 +528,7 @@ ggplotly(graph.clinical, tooltip=c("y", "text"), height=450, width=800) %>%
 
 ```
 
-This graph separates the subjects by clinical status. 
+This graph separates the participant by clinical status. 
 
 ```{r, Response Time by Clinical Status, echo=FALSE}
 
@@ -529,6 +542,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=responseTime, col=clinicalS
   xlab("Lesson") +
   ylab("Mean Response Time") +
   ggtitle("Response Time by Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
   theme_pander() +
   theme()
   
