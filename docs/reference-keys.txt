@@ -7,3 +7,8 @@ average-accuracy
 methods
 rate-of-forgetting
 results
+participants
+memory-task
+accuracy
+rate-of-forgetting-1
+references

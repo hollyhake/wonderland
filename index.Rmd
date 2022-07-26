@@ -61,15 +61,20 @@ The goal of this project is to track memory decline in Alzheimer’s disease and
 ## Background
 Memory loss is a debilitating symptom of neurodegenerative diseases. Current assessment tools, however, lack the reliable, convenient, and repeatable qualities needed to capture the individualized and evolving nature of memory decline. This project uses neurocomputational models to track and predict memory decline in subjectively- or mildly-cognitively impaired (MCI) individuals. MCI = Functional capacity is relatively intact, but on objective testing, show cognitive decline in at least one area of neuropsychological functioning.
 
+## Rate of Forgetting
+
+
 # Methods 
 
-## Rate of Forgetting
+## Participants 
+
+## Memory Task
 
 # Results
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-07-25.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-07-26.RData")
 
 # Set path for figures 
 path <- "C:/Users/17203/Desktop/Memory/Data"
@@ -158,29 +163,63 @@ level_order<- factor(clinical$lessonTitle, level = c('01 Practice','Pasta','Swah
 
 
 ```
-# Average Accuracy
+## Accuracy
 
-```{r,echo=FALSE, results= 'hide'}
+The averaged accuracy for each participant across all lessons. 
+
+```{r,echo=FALSE, fig.height=8, fig.width=18, results= 'hide'}
 
 # All subjects
 
-ggplot(clinical, aes(x=level_order, y=correct, col=lessonTitle, fill=lessonTitle
+graph.clinical = ggplot(clinical, aes(x=level_order, y=correct, col=lessonTitle, fill=lessonTitle
                     ))+
-  geom_violin(width=2, alpha =0.2) +
+  geom_violin(width=1, alpha =0.2) +
   #geom_boxplot(width=.5, alpha =0.2)+
   #stat_summary(fun.y=mean, geom="pointrange", size=0.3, shape= 1, color="black")+
-  geom_point(size = 3, position = position_jitter(0.1)) +
+  geom_point(size = 2, position = position_jitter(0.1)) +
   #scale_color_viridis("lessonTitle", option = "plasma") +
   xlab("Lesson") +
   ylab("Accuracy") +
+  ylim(0.25,1.0)+
   ggtitle("Average Accuracy for Each Lesson") +
   theme_pander() +
-  theme(panel.grid.major.y = element_blank(),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
+  theme(#panel.grid.major.y = element_blank(),
+        #panel.grid.major.x = element_blank(),
+        #panel.grid.minor.y = element_blank(),
         legend.position = "none")
 
+ggplotly(graph.clinical, tooltip = c("y", "text"), height = 450, width = 800) %>% 
+  config(displayModeBar= FALSE)
+
 ```
+
+This graph lets you interact with the data points to get a better look at the
+accuracy scores for each of the individual subjects.
+
+```{r, AVG Individual accuracy-|-Line, fig.height=8, fig.width=18, echo=FALSE}
+
+# Individual
+graph.clinical = ggplot(clinical, aes(x=level_order, y=correct,
+                                              text=paste0(userId)))+
+  geom_boxplot(size =0.5) +
+  geom_line(aes(group=paired), size=0.2, position = position_dodge(0))+
+  geom_point(aes(fill=userId, group=paired), size=3, shape=20, stroke = 0, position = position_dodge(0))+
+  scale_color_viridis(alpha= 0.1,"correct", option = "plasma") +
+  xlab("Lesson") +
+  ylab("Accuracy") +
+  ylim(0.25,1.0)+
+  ggtitle("Average Accuracy for Each Lesson (individual)") +
+  theme_pander() +
+  theme(legend.position = "right",
+        legend.title = element_text("Subject"),
+        panel.grid.major = element_blank())
+
+ggplotly(graph.clinical, tooltip = c("y", "text"), height = 450, width = 800) %>% 
+  config(displayModeBar= FALSE)
+
+```
+
+This graph separates the subjects by clinical status. 
 
 ```{r, AVG accuracy-|-Line,echo=FALSE}
 
@@ -193,10 +232,11 @@ graph.clinical = ggplot(clinical, aes(x=level_order, y=correct,col = clinicalSta
   geom_boxplot(size =0.5, alpha =0.1) +
   geom_line(aes(group=paired), size=0.2, position = position_dodge(0))+
   geom_point(aes(fill=clinicalStatus, group=paired), size=3, shape=20, stroke = 0, position = position_dodge(0))+
-  scale_fill_manual(values=cvpalette)+
+  #scale_fill_manual(values=cvpalette)+
   #scale_color_viridis(discrete=TRUE, option = "magma",alpha=0.5) +
   xlab("Lesson") +
-  ylab("Avg Accuracy") +
+  ylab("Accuracy") +
+  ylim(0.25,1.0)+
   ggtitle("Average Accuracy for Each Lesson (Clinical Status)") +
   theme(legend.position = "right",
         legend.title = element_text("Subject"),
@@ -208,3 +248,104 @@ ggplotly(graph.clinical, tooltip = c("y", "text"), height = 450, width = 800) %>
   config(displayModeBar= FALSE)
 
 ```
+
+## Rate of Forgetting 
+
+The averaged Rate of Forgetting for each participant across all lessons. 
+
+```{r,echo=FALSE, results= 'hide'}
+
+# All subjects
+
+ggplot(clinical, aes(x=level_order, y=MeanAlpha, col=lessonTitle, fill=lessonTitle
+                    ))+
+  geom_violin(width=2, alpha =0.2) +
+  #geom_boxplot(width=.5, alpha =0.2)+
+  #stat_summary(fun.y=mean, geom="pointrange", size=0.3, shape= 1, color="black")+
+  geom_point(size = 3, position = position_jitter(0.1)) +
+  #scale_color_viridis("lessonTitle", option = "plasma") +
+  xlab("Lesson") +
+  ylab("RoF") +
+  ylim(0.1,0.5)+
+  ggtitle("Average RoF for Each Lesson") +
+  theme_pander() +
+  theme(#panel.grid.major.y = element_blank(),
+        #panel.grid.major.x = element_blank(),
+        #panel.grid.minor.y = element_blank(),
+        legend.position = "none")
+
+```
+
+
+As you can see, individuals with Mild Cognitive Impairment (MCIs) tend to have 
+a higher Rate of Forgetting than the age-matched controls. 
+
+```{r, AVG Alpha Mean-|-Line, fig.height=8, fig.width=18, echo=FALSE}
+
+
+# Group
+graph.clinical = ggplot(clinical, aes(x=level_order, y=MeanAlpha,col = clinicalStatus, fill = clinicalStatus,
+                                              text=paste0(userId)))+
+  geom_boxplot(size =0.5,alpha =0.1) +
+  geom_line(aes(group=paired), size=0.2, position = position_dodge(0))+
+  geom_point(aes(fill=clinicalStatus, group=paired), size=3, shape=20, stroke = 0, position = position_dodge(0))+
+  #scale_color_viridis("MeanAlpha", option = "plasma") +
+  xlab("Lesson") +
+  ylab("Rate of Forgetting (Mean Alpha)") +
+  ggtitle("Rate of Forgetting by Clinical Status (Mean)") +
+  theme_pander() +
+  theme(legend.position = "right",
+        legend.title = element_text("Subject"),
+        panel.grid.major = element_blank())
+
+ggplotly(graph.clinical, tooltip = c("y", "text"), height = 450, width = 800) %>% 
+  config(displayModeBar= FALSE)
+
+
+
+# Individual
+graph.clinical = ggplot(clinical, aes(x=level_order, y=MeanAlpha,
+                                              text=paste0(userId)))+
+  geom_boxplot(size =0.5) +
+  geom_line(aes(group=paired), size=0.2, position = position_dodge(0))+
+  geom_point(aes(fill=userId, group=paired), size=3, shape=20, stroke = 0, position = position_dodge(0))+
+  scale_color_viridis("MeanAlpha", option = "plasma") +
+  xlab("Lesson") +
+  ylab("Rate of forgetting (Mean Alpha)") +
+  ggtitle("Rate of Forgetting Per Participant (Mean)") +
+  theme_pander() +
+  theme(legend.position = "right",
+        legend.title = element_text("Subject"),
+        panel.grid.major = element_blank())
+
+ggplotly(graph.clinical, tooltip = c("y", "text"), height = 450, width = 800) %>% 
+  config(displayModeBar= FALSE)
+
+```
+
+```{r, fig.height=8, fig.width=5, echo=FALSE}
+ggplot(clinical, aes(y = MeanAlpha, x = level_order, col = clinicalStatus,
+                     fill = clinicalStatus)) +
+  #geom_boxplot() +
+  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
+  stat_summary(geom="point", fun.data = "mean_sdl", size=3) +
+  stat_summary(geom="ribbon", fun.data = "mean_se", 
+               aes(group=clinicalStatus), 
+               col=NA,
+               alpha=0.25) +
+  stat_summary(geom="line", fun = "mean", aes(group = clinicalStatus)) +
+  scale_color_d3() +
+  scale_fill_d3() +
+  xlab("Lesson") +
+  ylab("Mean Rate of Forgetting") +
+  ggtitle("Rate of Forgetting By Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme(axis.text.x = element_text(angle = 0, vjust = 1, hjust=1))+
+  theme_pander()
+  
+```
+  
+  
+  ```{r}
+  
+  ```
