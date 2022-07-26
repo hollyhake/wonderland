@@ -165,7 +165,7 @@ clinical <- clinical %>%
   mutate(paired= factor(userId))
 
 # Order the lessons by week
-level_order<- factor(clinical$lessonTitle, level = c('01 Practice','Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers'))
+#level_order<- factor(clinical$lessonTitle, level = c('01 Practice','Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers'))
 
 # Delete practice
 clinical <- clinical[!(clinical$lessonTitle=="01 Practice"), ]
