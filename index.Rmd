@@ -562,7 +562,7 @@ clinical_avg <- clinical %>%
 
 p1 <- ggplot(clinical, aes(x=Meanalpha, fill=clinicalStatus)) +
   geom_density(alpha=0.4, col="white", bw=0.02) +
-  scale_fill_d3() +
+  scale_fill_manual(values = c("gold3", "purple3")) +
   xlab("Mean Rate of Forgetting") +
   ggtitle("RoF Distributions\n(single sessions)") +
   ylab("Number of Observations") +
@@ -574,7 +574,7 @@ p1 <- ggplot(clinical, aes(x=Meanalpha, fill=clinicalStatus)) +
 
 p2 <- ggplot(clinical_avg, aes(x=RoF, fill=clinicalStatus)) +
   geom_density(alpha=0.4, col="white", bw=0.03) +
-  scale_fill_d3() +
+  scale_fill_manual(values = c("gold3", "purple3")) +
   xlab("Mean Rate of Forgetting") +
   ggtitle("RoF Distributions\n(averaged)") +
   ylab("Number of Observations") +
@@ -662,8 +662,8 @@ Then, we can visualize the ROC curve and see the classification accuracy at each
 curve <- curve %>% mutate(auc = (TPR + TNR)/2)
 
 ggplot(arrange(curve, TPR), aes(x=TNR, y=TPR)) + 
-  geom_point(size=2, col="red", alpha=0.5) + 
-  geom_line(col="red") + 
+  geom_point(size=2, col="purple", alpha=0.5) + 
+  geom_line(col="purple") + 
   geom_text_repel(aes(label=paste("RoF =", Threshold, "\n AUC =", percent(auc, .2))), 
                   col="black",
                   #position=position_stack(vjust=0.5), 
