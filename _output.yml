@@ -4,5 +4,6 @@ bookdown::gitbook:
     toc:
       before: |
         <li><a href="./">Tracking Memory Decline</a></li>
+        <li><a href="./">H. Hake, 2022</a></li>
       after: |
         <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
