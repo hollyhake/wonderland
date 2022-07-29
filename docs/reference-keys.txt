@@ -6,7 +6,6 @@ memory-task
 data-processing
 results
 accuracy-and-response-time
-rate-of-forgetting
 mean-rate-of-forgetting
 median-rate-of-forgetting
 distribution-of-rate-of-forgetting
@@ -25,3 +24,7 @@ fig:DisRoF
 fig:Class
 fig:Classavg
 
+tab:unnamed-chunk-4
+tab:RoFANOVA
+tab:RoFANOVAmed
+rate-of-forgetting-1
