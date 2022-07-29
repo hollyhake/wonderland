@@ -1,0 +1,623 @@
+# Results
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(tidyverse)
+library(dplyr)
+library(magrittr)
+library(ggplot2)
+library(ggthemes)
+library(ppcor)
+library(reshape2)
+#library(gglasso)
+library(glmnet)
+library(ggsci)
+library(viridis)
+library(ggExtra)
+library(kableExtra)
+library(xtable)
+library(ggrepel)
+library(scales)
+library(car)
+library(patchwork)      # Multi-plot alignment
+#library(data.table)
+library(ggcorrplot)
+library(readr)
+library(gapminder) # dataset used to make the box plot connected by lines
+#theme_set(theme_bw(16)) # theme used to make the box plot connected by lines
+library(RColorBrewer)
+library(plotly) # Added to make interactive graphs 
+library(lubridate) # Added to make interactive graphs; use different date funcs
+library(stringr) # Added to make interactive graphs; use different txt funcs
+library(extrafont) # Added to make interactive graphs; change font on graphs
+library(htmlwidgets) # Added to make interactive graphs; make exports interactive
+library(broom)
+library(cowplot)
+
+# Install SlimStampen packages. Instructions on https://github.com/VanRijnLab/SlimStampeRData
+#install.packages("devtools")
+library(devtools)
+#devtools::install_github("VanRijnLab/SlimStampeRData",
+                      #   build_vignettes = TRUE,
+                       #  dependencies = TRUE,
+                        # force = TRUE) 
+# The console will show a prompt asking whether all packages should be updated. Select option 1 (by typing 1 and then pressing enter), this will update all packages.
+vignette("SlimStampeRVignette")
+library(SlimStampeRData)
+```
+
+
+```{r, echo=FALSE, results= 'hide'}
+
+# Load data
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-07-29.RData")
+
+# Set path for figures 
+path <- "C:/Users/17203/Desktop/Memory/Data"
+
+# Filter for just ADRC subjects & group by clinical status
+groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
+data %>% 
+  filter(userId %in% groups$userId) -> data
+
+```
+
+
+```{r, echo=FALSE, results= 'hide'}
+
+# Calculate fact rep, activation, and alpha 
+MAX_ALPHA=0.8
+data <- data %>%
+  calculate_repetition() %>%
+  calculate_alpha_and_activation(maxAlpha=MAX_ALPHA)
+
+```
+```{r, echo=FALSE, results= 'hide'}
+# Calculate avg alpha
+data_lastRep <- data %>%
+  group_by(lessonId, userId, sessionId, factId) %>%
+  mutate(LastRepetition = max(repetition)) %>%
+  filter(repetition == LastRepetition) %>%
+  ungroup()
+
+data_avg1 <- data_lastRep %>%
+  group_by(userId, lessonTitle, lessonId, sessionId) %>%
+  summarise(Meanalpha=mean(alpha), Medianalpha=median(alpha)) 
+
+data_avg2 <- data %>%
+  group_by(lessonId, userId, sessionId) %>%
+  summarise(correct = mean(correct), responseTime=mean(reactionTime)) %>%
+  ungroup()
+
+data_avg <- data_avg1 %>% inner_join(data_avg2)
+
+data_avg %>% 
+  group_by(userId, lessonTitle, lessonId) %>% 
+  summarize(numSess=length(unique(sessionId))) 
+
+
+# Filter the sessions
+sessionData <- data %>% 
+  group_by(userId, sessionId, lessonId, lessonTitle) %>% 
+  summarize(duration = (max(presentationStartTime) - min(presentationStartTime))/60000,
+            start = min(presentationStartTime),
+            legit = if_else(duration > 6, T, F))
+
+sessionData <- sessionData %>% 
+  group_by(userId, lessonId, lessonTitle) %>% 
+  arrange(start, by_group=T) %>%
+  mutate(sessionRank = seq(1, length(start)))
+
+sessionDataFiltered <- sessionData %>%
+  filter(legit == T) %>%
+  group_by(userId, lessonId) %>%
+  mutate(minRank = min(sessionRank))
+
+sessionData <- sessionData %>%
+  inner_join(sessionDataFiltered) %>%
+  mutate(usable = if_else(minRank == sessionRank, T, F))
+
+
+# Group by clinical status
+clinical <- inner_join(data_avg, groups) %>%
+  inner_join(sessionData) %>%
+  filter(usable == T)
+
+```
+
+```{r, echo=FALSE}
+clinical$userId <- as.character(clinical$userId)
+clinical <- clinical %>%
+  mutate(paired= factor(userId))
+
+# Delete practice
+clinical <- clinical[!(clinical$lessonTitle=="01 Practice"), ]
+
+# Order the lessons by week
+#level_order<- factor(clinical$lessonTitle, level = c('01 Practice','Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers'))
+clinical$level_order<- factor(clinical$lessonTitle, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags'))
+
+xlabels <- c("Pasta", "Swahili", "Flowers", "Capitals", "Birds","News", "Flags")
+
+clinical %>% 
+  group_by(level_order, clinicalStatus) %>% 
+  summarise(n=length(userId)) %>%
+  pivot_wider(names_from=clinicalStatus, values_from = n) %>%
+  kbl(caption= "Number of Control and MCI participants that completed each lesson", col.names = c("Lesson", "Control", "MCI")) %>%
+  kable_paper(full_width = F) 
+
+
+
+# Add images to the table 
+#%>%
+ # column_spec(1, image = spec_image(c("C:/Users/17203/Documents/wonderland/images/flowers.png","C:/Users/17203/Documents/wonderland/images/birds.png", "C:/Users/17203/Documents/wonderland/images/birds.png", "C:/Users/17203/Documents/wonderland/images/birds.png", "C:/Users/17203/Documents/wonderland/images/birds.png","C:/Users/17203/Documents/wonderland/images/birds.png","C:/Users/17203/Documents/wonderland/images/birds.png"), 50, 50))
+```
+
+## Accuracy and Response Time
+
+The averaged accuracy for each participant across all lessons. 
+
+```{r, Acc, echo=FALSE, fig.cap="Accuracy and Response Time Across Lessons"}
+
+PAcc1=ggplot(clinical, aes(x=level_order, y=correct, col=lessonTitle, fill=lessonTitle)) +
+  geom_violin(width=1, alpha=0.2) +
+  geom_boxplot(width=.5, alpha=0.2) +
+  #stat_summary(fun.y=mean, geom="pointrange", size=0.3, shape= 1, color="black") +
+  geom_point(size=3, position=position_jitter(0.1)) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Accuracy") +
+  ggtitle("Accuracy Across Lessons") +
+  theme_pander() +
+  theme(legend.position = "none")
+
+PRT1=ggplot(clinical, aes(x=level_order, y=responseTime, col=lessonTitle, fill=lessonTitle)) +
+  geom_violin(width=1, alpha=0.2) +
+  geom_boxplot(width=.5, alpha=0.2) +
+  #stat_summary(fun.y=mean, geom="pointrange", size=0.3, shape= 1, color="black") +
+  geom_point(size=3, position=position_jitter(0.1)) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Response Time (ms)") +
+  ggtitle("Response Time Across Lessons") +
+  theme_pander() +
+  theme(legend.position = "none")
+
+
+plot_grid(PAcc1, PRT1, ncol = 1, nrow = 2)
+
+```
+
+The graph in Figure \ref{fig:Acc} shows the average accuracy and response time for each participant.
+
+```{r, Accp, echo=FALSE, fig.cap="Accuracy by Participant",out.width='100%'}
+
+graph.clinical=ggplot(clinical, aes(x=level_order, y=correct, text=paste0(userId))) +
+  geom_boxplot(size=0.3) +
+  geom_line(aes(group=paired), size=0.2, position=position_dodge(0))+
+  geom_point(aes(fill=userId, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0))+
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Mean Accuracy") +
+  ggtitle("Accuracy by Participant") +
+  labs(fill="Participant") +
+  theme_pander() +
+  theme()
+
+ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+```
+
+The graph in Figure \ref{fig:Accp} is interactive. Hover over the data points to get a better look at the
+accuracy scores for each participant. Double click on a participant ID to isolate that participant's data points. 
+
+```{r, AccC, echo=FALSE, fig.cap="Accuracy by Clinical Status",out.width='100%'}
+
+graph.clinical=ggplot(clinical, aes(x=level_order, y=correct, col=clinicalStatus, fill=clinicalStatus, text=paste0(userId)))+
+  geom_boxplot(size =0.3, alpha=0.1) +
+  geom_line(aes(group=paired), size=0.2, position=position_dodge(0)) +
+  geom_point(aes(fill=clinicalStatus, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0)) +
+  scale_color_manual(values = c("gold3", "purple3")) +
+  scale_fill_manual(values = c("gold3", "purple3")) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Mean Accuracy") +
+  ggtitle("Accuracy by Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme_pander() +
+  theme()
+  
+ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+```
+
+This graph in Figure \ref{fig:AccC} separates the participants by clinical status. 
+
+```{r, RTp, echo=FALSE, fig.cap="Response Time by Participant",out.width='100%'}
+
+graph.clinical=ggplot(clinical, aes(x=level_order, y=responseTime, text=paste0(userId))) +
+  geom_boxplot(size=0.3) +
+  geom_line(aes(group=paired), size=0.2, position=position_dodge(0))+
+  geom_point(aes(fill=userId, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0))+
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Mean Response Time (ms)") +
+  ggtitle("Response Time by Participant") +
+  labs(fill="Participant") +
+  theme_pander() +
+  theme()
+
+ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+```
+The graph in Figure \ref{fig:RTp} is interactive. Hover over the data points to get a better look at the
+response times for each participant. Double click on a participant ID to isolate that participant's data points. 
+
+```{r, RTc, echo=FALSE, fig.cap="Response Time by Clinical Status",out.width='100%'}
+
+graph.clinical=ggplot(clinical, aes(x=level_order, y=responseTime, col=clinicalStatus, fill=clinicalStatus, text=paste0(userId)))+
+  geom_boxplot(size =0.3, alpha=0.1) +
+  geom_line(aes(group=paired), size=0.2, position=position_dodge(0)) +
+  geom_point(aes(fill=clinicalStatus, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0)) +
+  scale_color_manual(values = c("gold3", "purple3")) +
+  scale_fill_manual(values = c("gold3", "purple3")) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Mean Response Time (ms)") +
+  ggtitle("Response Time by Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme_pander() +
+  theme()
+  
+ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+```
+
+
+## Rate of Forgetting 
+
+### Mean Rate of Forgetting 
+
+The mean Rate of Forgetting for each participant across all lessons. 
+
+```{r, RoF, echo=FALSE, fig.cap="Rate of Forgetting Across Lessons",out.width='100%'}
+
+graph.clinical=ggplot(clinical, aes(x=level_order, y=Meanalpha, col=lessonTitle, fill=lessonTitle)) +
+  geom_violin(width=2, alpha=0.2) +
+  geom_boxplot(width=.5, alpha=0.2) +
+  stat_summary(fun.y=mean, geom="pointrange", size=0.3, shape=1, color="black") +
+  geom_point(size=3, position=position_jitter(0.1)) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Mean Rate of Forgetting") +
+  ggtitle("Rate of Forgetting Across Lessons") +
+  theme_pander() +
+  theme(legend.position="none")
+
+ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+```
+
+```{r, RoFp, echo=FALSE, fig.cap="Rate of Forgetting by Participant",out.width='100%'}
+
+graph.clinical=ggplot(clinical, aes(x=level_order, y=Meanalpha, text=paste0(userId))) +
+  geom_boxplot(size=0.3) +
+  geom_line(aes(group=userId), size=0.2, position=position_dodge(0)) +
+  geom_point(aes(fill=userId, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0)) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Mean Rate of forgetting") +
+  ggtitle("Rate of Forgetting by Participant") +
+  labs(fill="Participant") +
+  theme_pander() +
+  theme()
+
+ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+```
+
+As you can see, individuals with Mild Cognitive Impairment (MCIs) tend to have 
+a higher Rate of Forgetting than the age-matched controls. 
+
+```{r, RoFC, echo=FALSE, fig.cap="Rate of Forgetting by Clinical Status",out.width='100%'}
+
+# Rate of Forgetting by Clinical Status
+graph.clinical=ggplot(clinical, aes(x=level_order, y=Meanalpha,col=clinicalStatus, fill=clinicalStatus,text=paste0(userId))) +
+  geom_boxplot(size=0.3, alpha=0.2) +
+  geom_line(aes(group=paired), size=0.2, position=position_dodge(0)) +
+  geom_point(aes(fill=clinicalStatus, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0)) +
+  scale_color_manual(values = c("gold3", "purple3")) +
+  scale_fill_manual(values = c("gold3", "purple3")) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Mean Rate of Forgetting") +
+  ggtitle("Rate of Forgetting by Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme_pander() +
+  theme()
+
+ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+```
+
+```{r, RoFAS, echo=FALSE, fig.cap="Rate of Forgetting by Clinical Status AS"}
+
+PRoF1=ggplot(clinical, aes(y = Meanalpha, x = level_order, col = clinicalStatus, fill = clinicalStatus)) +
+  geom_boxplot(alpha=0.25) +
+  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
+  stat_summary(geom="point", fun.data="mean_sdl", size=3) +
+  #stat_summary(geom="ribbon", fun.dat="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
+  stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
+  scale_color_manual(values=c("gold3", "purple3")) +
+  scale_fill_manual(values=c("gold3", "purple3")) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Mean Alpha") +
+  ggtitle("Rate of Forgetting By Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme_pander() +
+  theme(legend.position = "none") 
+
+PRoF2=ggplot(clinical, aes(y=Meanalpha, x =level_order, col=clinicalStatus, fill=clinicalStatus)) +
+  #geom_boxplot() +
+  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
+  stat_summary(geom="point", fun.data="mean_sdl", size=3) +
+  stat_summary(geom="ribbon", fun.dat ="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
+  stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
+  scale_color_manual(values=c("gold3", "purple3")) +
+  scale_fill_manual(values=c("gold3", "purple3")) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Mean Alpha") +
+  ylim(0.3,0.5) +
+  #ggtitle("Rate of Forgetting By Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme_pander() +
+  theme(legend.position = "bottom") 
+
+
+plot_grid(PRoF1, PRoF2, ncol = 1, nrow = 2)
+  
+```
+
+### Median Rate of Forgetting 
+
+The median Rate of Forgetting for each participant across all lessons.
+
+```{r, MedRoFAS, echo=FALSE, fig.cap="Median Rate of Forgetting by Clinical Status AS"}
+
+PRoF3=ggplot(clinical, aes(y = Medianalpha, x = level_order, col = clinicalStatus, fill = clinicalStatus)) +
+  geom_boxplot(alpha=0.25) +
+  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
+  stat_summary(geom="point", fun.data="mean_sdl", size=3) +
+  #stat_summary(geom="ribbon", fun.dat="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
+  stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
+  scale_color_manual(values=c("gold3", "purple3")) +
+  scale_fill_manual(values=c("gold3", "purple3")) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Median Alpha") +
+  ggtitle("Rate of Forgetting By Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme_pander() +
+  theme(legend.position = "none") 
+
+PRoF4=ggplot(clinical, aes(y=Medianalpha, x =level_order, col=clinicalStatus, fill=clinicalStatus)) +
+  #geom_boxplot() +
+  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
+  stat_summary(geom="point", fun.data="mean_sdl", size=3) +
+  stat_summary(geom="ribbon", fun.dat ="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
+  stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
+  scale_color_manual(values=c("gold3", "purple3")) +
+  scale_fill_manual(values=c("gold3", "purple3")) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("Median Alpha") +
+  ylim(0.3,0.5) +
+  #ggtitle("Rate of Forgetting By Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme_pander() +
+  theme(legend.position = "bottom") 
+
+
+plot_grid(PRoF3, PRoF4, ncol = 1, nrow = 2)
+  
+```
+
+## Distribution of Rate of Forgetting
+
+
+
+```{r, DisRoF, echo=FALSE, fig.cap="Distribution of Rate of Forgetting by Clinical Status"}
+
+clinical_avg <- clinical %>% 
+  group_by(userId, clinicalStatus) %>%
+  summarise(RoF = mean(Meanalpha))
+
+PRoFD1 <- ggplot(clinical, aes(x=Meanalpha, fill=clinicalStatus)) +
+  geom_density(alpha=0.25, col="white", bw=0.02) +
+  scale_fill_manual(values = c("gold3", "purple3")) +
+  xlab("Mean Rate of Forgetting") +
+  ggtitle("RoF Distributions\n(single sessions)") +
+  ylab("Number of Observations") +
+  xlim(c(0.2, 0.6)) +
+  labs(fill="Clinical Status") +
+  theme_pander() +
+  theme(legend.position = "bottom") 
+
+
+PRoFD2 <- ggplot(clinical_avg, aes(x=RoF, fill=clinicalStatus)) +
+  geom_density(alpha=0.25, col="white", bw=0.03) +
+  scale_fill_manual(values = c("gold3", "purple3")) +
+  xlab("Mean Rate of Forgetting") +
+  ggtitle("RoF Distributions\n(averaged)") +
+  ylab("Number of Observations") +
+  xlim(c(0.2, 0.6)) +
+  labs(fill="Clinical Status") +
+  theme_pander() +
+  theme(legend.position = "bottom") 
+
+
+## This is a function from the 'cowplot' package
+plot_grid(PRoFD1, PRoFD2, labels=c("A", "B"), ncol = 2, nrow = 1)
+
+```
+
+Figure examines the distribution of ROF values for MCIs and controls, either across all sessions (A) or averaged across all sessions (B).
+
+## Classification accuracy
+
+### Single session
+
+How well can we tell patients from controls based on their ROF value from a single session?
+
+```{r, results= 'hide', echo=FALSE}
+curve <- NULL
+mlclinical <- clinical %>%
+  #group_by(userId,clinicalStatus) %>%
+  #summarize(Meanalpha=mean(Meanalpha), Medianalpha = median(Meanalpha)) %>%
+  mutate(observed = ifelse(clinicalStatus == "MCI", -1, 1)) 
+
+for (threshold in seq(0.2, 0.8, 0.01)) {
+  subthreshold <- mlclinical %>%
+    mutate(prediction = ifelse(Meanalpha <= threshold, 1, -1)) %>%
+    mutate(accuracy = ifelse(prediction == observed, 1, 0)) %>%
+    group_by(observed) %>%
+    summarise(accuracy = mean(accuracy))
+  
+  tnr <- subthreshold %>% 
+    filter(observed == -1) %>% 
+    dplyr::select(accuracy) %>%
+    as.numeric()
+  
+  tpr <- subthreshold %>% 
+    filter(observed == 1) %>% 
+    dplyr::select(accuracy) %>%
+    as.numeric()
+  
+  partial <- tibble(Threshold = threshold,
+                    TNR = tnr,
+                    TPR = tpr)
+  if (is.null(curve)) {
+    curve <- partial
+  } else {
+    curve <- rbind(curve, partial)
+  }
+}
+```
+And now, we can visualize the ROC graph. First, we can compute the global AUC
+
+```{r, results= 'hide', echo=FALSE}
+AUC <- 0
+step <- 0.01
+for (tnr in seq(0, 1, step)) {
+  y <- curve %>% filter (TNR <= tnr) %>% filter(TNR == max(TNR)) %>% summarise(TPR = mean(TPR)) %>% as.numeric()
+  AUC <- AUC + (y * step)
+}
+```
+
+The global AUC is `r AUC`.
+
+Then, we can visualize the ROC curve and see the classification accuracy at each RoF threshold:
+
+```{r, Class, echo=FALSE, fig.cap="Classification Accuracy for different RoF thresholds"}
+curve <- curve %>% mutate(auc = (TPR + TNR)/2)
+
+ggplot(arrange(curve, TPR), aes(x=TNR, y=TPR)) + 
+  geom_point(size=2, col="purple", alpha=0.5) + 
+  geom_line(col="purple") + 
+  geom_text_repel(aes(label=paste("RoF =", Threshold, "\n AUC =", percent(auc, .2))), 
+                  col="black",
+                  #position=position_stack(vjust=0.5), 
+                  direction="both",
+                  size=3) +
+  ylab("Sensitivity (True Positive Rate)") +
+  xlab("Specificity (True Negative Rate)") +
+  scale_x_reverse() +
+  ylim(0, 1) +
+  xlim(1, 0) +
+  coord_equal() +
+  ggtitle("ROC Curve for Different Thresholds") +
+  geom_abline(slope=1, intercept = 1, col="grey", linetype = "dashed") +
+  theme_pander()
+```
+
+### Average of all sessions
+
+```{r, results='hide', echo=FALSE}
+curve <- NULL
+mlclinical <- clinical %>%
+  group_by(userId,clinicalStatus) %>%
+  summarize(Meanalpha=mean(Meanalpha), Medianalpha = median(Meanalpha)) %>%
+  mutate(observed = ifelse(clinicalStatus == "MCI", -1, 1)) 
+
+for (threshold in seq(0.2, 0.8, 0.01)) {
+  subthreshold <- mlclinical %>%
+    mutate(prediction = ifelse(Meanalpha <= threshold, 1, -1)) %>%
+    mutate(accuracy = ifelse(prediction == observed, 1, 0)) %>%
+    group_by(observed) %>%
+    summarise(accuracy = mean(accuracy))
+  
+  tnr <- subthreshold %>% 
+    filter(observed == -1) %>% 
+    dplyr::select(accuracy) %>%
+    as.numeric()
+  
+  tpr <- subthreshold %>% 
+    filter(observed == 1) %>% 
+    dplyr::select(accuracy) %>%
+    as.numeric()
+  
+  partial <- tibble(Threshold = threshold,
+                    TNR = tnr,
+                    TPR = tpr)
+  if (is.null(curve)) {
+    curve <- partial
+  } else {
+    curve <- rbind(curve, partial)
+  }
+}
+```
+And now, we can visualize the ROC graph. First, we can compute the global AUC
+
+```{r, results='hide', echo=FALSE}
+AUC <- 0
+step <- 0.01
+for (tnr in seq(0, 1, step)) {
+  y <- curve %>% filter (TNR <= tnr) %>% filter(TNR == max(TNR)) %>% summarise(TPR = mean(TPR)) %>% as.numeric()
+  AUC <- AUC + (y * step)
+}
+```
+
+The global AUC is `r AUC`.
+
+Then, we can visualize the ROC curve and see the classification accuracy at each RoF threshold:
+
+```{r, Classavg, echo=FALSE, fig.cap="Classification Accuracy for different averaged RoF thresholds"}
+curve <- curve %>% mutate(auc = (TPR + TNR)/2)
+
+ggplot(arrange(curve, TPR), aes(x=TNR, y=TPR)) + 
+  geom_point(size=2, col="purple", alpha=0.5) + 
+  geom_line(col="purple") + 
+  geom_text_repel(aes(label=paste("RoF =", Threshold, "\n AUC =", percent(auc, .2))), 
+                  col="black",
+                  #position=position_stack(vjust=0.5), 
+                  direction="both",
+                  size=3) +
+  ylab("Sensitivity (True Positive Rate)") +
+  xlab("Specificity (True Negative Rate)") +
+  scale_x_reverse() +
+  ylim(0, 1) +
+  xlim(1, 0) +
+  coord_equal() +
+  ggtitle("ROC Curve for Different Thresholds") +
+  geom_abline(slope=1, intercept = 1, col="grey", linetype = "dashed") +
+  theme_pander()
+```
