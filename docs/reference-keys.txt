@@ -1,15 +1,8 @@
 introduction
-the-pool-of-tears
-a-caucus-race-and-a-long-tale
-goal
-background
-average-accuracy
 methods
 rate-of-forgetting
-results
 participants
 memory-task
-accuracy
 rate-of-forgetting-1
 references
 mean-rate-of-forgetting
@@ -19,8 +12,6 @@ rate-of-forgetting-distribution
 statistics
 classification-accuracy
 single-session
-supplement
-save-plots
 average-of-all-sessions
 tab:unnamed-chunk-4
 fig:figs
@@ -45,3 +36,4 @@ fig:MedRoFAS
 fig:DisRoF
 fig:Class
 fig:Classavg
+results
