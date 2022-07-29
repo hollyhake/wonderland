@@ -9,38 +9,42 @@ site: bookdown::bookdown_site
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(tidyverse)
 library(dplyr)
-library(magrittr)
+library(broom)
+library(reshape2)
+library(glmnet)
+library(readr)
+
+## Graphics
 library(ggplot2)
 library(ggthemes)
+library(ggrepel)
 library(ppcor)
-library(reshape2)
-#library(gglasso)
-library(glmnet)
+library(ggExtra)
 library(ggsci)
 library(viridis)
-library(ggExtra)
-library(kableExtra)
-library(xtable)
-library(ggrepel)
 library(scales)
-library(car)
-library(patchwork)      # Multi-plot alignment
-#library(data.table)
+library(patchwork)# Multi-plot alignment
 library(ggcorrplot)
-library(readr)
 library(gapminder) # dataset used to make the box plot connected by lines
-#theme_set(theme_bw(16)) # theme used to make the box plot connected by lines
-library(RColorBrewer)
+library(RColorBrewer) 
 library(plotly) # Added to make interactive graphs 
 library(lubridate) # Added to make interactive graphs; use different date funcs
 library(stringr) # Added to make interactive graphs; use different txt funcs
 library(extrafont) # Added to make interactive graphs; change font on graphs
 library(htmlwidgets) # Added to make interactive graphs; make exports interactive
-library(broom)
 library(cowplot)
 
-# Install SlimStampen packages. Instructions on https://github.com/VanRijnLab/SlimStampeRData
-#install.packages("devtools")
+## Tables
+library(kableExtra)
+library(xtable)
+
+# Date functions
+library(anytime)
+library(lubridate)
+
+# SlimStampen
+
+#install.packages("devtools") # Install SlimStampen packages. Instructions on https://github.com/VanRijnLab/SlimStampeRData
 library(devtools)
 #devtools::install_github("VanRijnLab/SlimStampeRData",
                       #   build_vignettes = TRUE,
@@ -49,6 +53,7 @@ library(devtools)
 # The console will show a prompt asking whether all packages should be updated. Select option 1 (by typing 1 and then pressing enter), this will update all packages.
 vignette("SlimStampeRVignette")
 library(SlimStampeRData)
+
 ```
 
 
