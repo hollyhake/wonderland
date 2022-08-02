@@ -55,7 +55,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-01.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-02.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
