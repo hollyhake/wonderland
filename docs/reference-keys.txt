@@ -28,3 +28,15 @@ tab:unnamed-chunk-4
 tab:RoFANOVA
 tab:RoFANOVAmed
 rate-of-forgetting-1
+functions
+average-rof-for-every-fact
+average-rof-for-every-participant-in-each-lesson
+interactive
+results-1
+average-rate-of-forgetting-for-every-fact
+average-rate-of-forgetting-for-every-participant-in-each-lesson-interactive
+average-rate-of-forgetting-for-every-participant-in-each-lesson
+fact-rof
+lesson-rof
+by-clinical-status
+supplement

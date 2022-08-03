@@ -225,6 +225,8 @@ ggplotly(graph.clinical, tooltip=c("y", "text")) %>%
 
 This graph is interactive (fig \@ref(fig:Accp)). Hover over the data points to get a better look at the accuracy scores for each participant. Double click on a participant ID to isolate that participant's data points. 
 
+
+
 ```{r, AccC, echo=FALSE, fig.cap="Accuracy by Clinical Status"}
 
 graph.clinical=ggplot(clinical, aes(x=level_order, y=correct, col=clinicalStatus, fill=clinicalStatus, text=paste0(userId)))+
