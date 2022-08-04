@@ -40,3 +40,8 @@ fact-rof
 lesson-rof
 by-clinical-status
 supplement
+lesson-facts-rof
+average-rate-of-forgetting-for-each-lessons-facts
+lesson-participant-rof
+average-rate-of-forgetting-for-every-participant-in-each-lesson-1
+average-rate-of-forgetting-for-every-participant-in-each-lesson-interactive-1

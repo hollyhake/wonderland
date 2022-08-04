@@ -55,7 +55,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-02.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-04.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -103,7 +103,7 @@ sessionData <- data %>%
   group_by(userId, sessionId, lessonId, lessonTitle) %>% 
   summarize(duration = (max(presentationStartTime) - min(presentationStartTime))/60000,
             start = min(presentationStartTime),
-            legit = if_else(duration > 6, T, F))
+            legit = if_else(duration > 6, T, F)) 
 
 sessionData <- sessionData %>% 
   group_by(userId, lessonId, lessonTitle) %>% 
@@ -119,16 +119,6 @@ sessionData <- sessionData %>%
   inner_join(sessionDataFiltered) %>%
   mutate(usable = if_else(minRank == sessionRank, T, F))
 
-# Order by week 
-sessionDataWeek <- sessionData %>% 
-  group_by(userId) %>%
-  mutate(date = anytime(start/1000)) %>%
-  #mutate(weekTime = floor(start/(1000*60*60*24*7))) %>%
-  mutate(experimentStart = "2022-06-15 00:00:01") %>%
-  mutate(firstDate = anytime(min(start/1000))) %>%
-  mutate(relativeWeek = (as_datetime(experimentStart) %--% as_datetime(firstDate))/weeks(period(1))) %>%
-  mutate(absoluteWeek = (as_datetime(experimentStart) %--% as_datetime(date))/weeks(period(1))) %>%
-  mutate(week = 1 + floor(absoluteWeek) - floor(relativeWeek))
 
 # Group by clinical status
 clinical <- inner_join(data_avg, groups) %>%
@@ -146,10 +136,9 @@ clinical <- clinical %>%
 clinical <- clinical[!(clinical$lessonTitle=="01 Practice"), ]
 
 # Order the lessons by week
-#level_order<- factor(clinical$lessonTitle, level = c('01 Practice','Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers'))
-clinical$level_order<- factor(clinical$lessonTitle, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags'))
+clinical$level_order<- factor(clinical$lessonTitle, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales'))
 
-xlabels <- c("Pasta", "Swahili", "Flowers", "Capitals", "Birds","News", "Flags")
+xlabels <- c("Pasta", "Swahili", "Flowers", "Capitals", "Birds","News", "Flags", "Folktales")
 
 clinical %>% 
   group_by(level_order, clinicalStatus) %>% 

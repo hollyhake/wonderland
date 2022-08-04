@@ -56,11 +56,10 @@ library(SlimStampeRData)
 
 ```
 
-
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-02.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-03.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -79,7 +78,7 @@ data <- data %>%
 
 ```
 
-```{r}
+```{r, echo=FALSE, results= 'hide'}
 # Filter by task  
 Pasta=filter(data,lessonTitle=='Pasta')
 Swahili1=filter(data,lessonTitle=='Swahili 1')
@@ -90,22 +89,12 @@ News=filter(data,lessonTitle=='Newspapers')
 Flags=filter(data,lessonTitle=='Asian Flags') 
 ```
 
-```{r}
-SlimStampeRData::average_accuracy_participants(data, filepath = "C:/Users/17203/Desktop/Memory/Data/")
-SlimStampeRData::average_ROF_participants(data, filepath = "C:/Users/17203/Desktop/Memory/Data/")
-SlimStampeRData::average_RT_participants(data, filepath = "C:/Users/17203/Desktop/Memory/Data/")
-
-SlimStampeRData::average_ROF_participants(Pasta, filepath = "C:/Users/17203/Desktop/Memory/Data/")
-SlimStampeRData::average_ROF_facts(Pasta, factNames = "factAnswer", filepath = "C:/Users/17203/Desktop/Memory/Data/")
-
-SlimStampeRData::average_accuracy_participants(Pasta, filepath = "C:/Users/17203/Desktop/Memory/Data/")
-```
-
-## Functions 
-
-### Average RoF for Every Fact
 
 ```{r, echo=FALSE, results= 'hide'}
+
+# Function
+## Average Rate of Forgetting for Every Fact 
+
 average_ROF_facts <- function(data, factNames = "factId", xlim = NULL, ylim = NULL) {
   if(missing(data)){
     stop("No data is provided")
@@ -207,21 +196,13 @@ firstsession <- function(df) {
 }
 ```
 
-```{r}
-average_ROF_facts(Pasta, factNames = "factAnswer")
-average_ROF_facts(Swahili1, factNames = "factAnswer")
-average_ROF_facts(Flowers, factNames = "factAnswer")
-average_ROF_facts(Capitals, factNames = "factAnswer")
-average_ROF_facts(Birds, factNames = "factAnswer")
-average_ROF_facts(News, factNames = "factAnswer")
-average_ROF_facts(Flags, factNames = "factAnswer")
 
-```
-### Average RoF for Every Participant in Each Lesson
+```{r, echo=FALSE, results= 'hide'}
 
-#### Interactive
+# Function
+## Average Rate of Forgetting for Every Participant in Each Lesson (Interactive)
+### Interactive
 
-```{r}
 average_ROF_participants_interactive <- function(data, xlim = NULL, ylim = NULL, userId = "userId") {
   if(missing(data)){
     stop("No data is provided")
@@ -308,7 +289,7 @@ firstsession <- function(df) {
   graph.clinical=ggplot2::ggplot(data = dat2, ggplot2::aes(x = factor(repetition), y = mean_alpha, group = userId, text=paste0(userId))) +
     ggplot2::geom_line(alpha = 1, ggplot2::aes(colour = factor(userId))) +
     ggplot2::geom_point(alpha = 0.5, size = 1, ggplot2::aes(colour = factor(userId), fill = factor(userId))) +
-    ggplot2::geom_point(data = dat5, alpha = 0.5, size = 3, label = userId, position = ggplot2::position_jitter(w = 0.08, h = 0), ggplot2::aes(colour = factor(userId), fill = factor(userId))) +
+    ggplot2::geom_point(data = dat5, alpha = 0.5, size = 3, position = ggplot2::position_jitter(w = 0.08, h = 0), ggplot2::aes(colour = factor(userId), fill = factor(userId))) +
     ggplot2::scale_color_manual(name="Participants", labels = dat5$Participant,values = partcolor, breaks=dat5$userId) +
     ggplot2::guides(fill = "none") +
     ggplot2::coord_cartesian(xlim = x, ylim = y) +
@@ -318,9 +299,6 @@ firstsession <- function(df) {
     ggplot2::guides(colour=ggplot2::guide_legend(nrow=18, byrow=FALSE)) +
     ggplot2::ggtitle(plotTitle)
     
-  
-    
-    #plot
   ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
   layout(legend = list(orientation = "h")) %>% 
   config(displayModeBar=FALSE)
@@ -328,53 +306,150 @@ firstsession <- function(df) {
 }    
 ```
 
+
+```{r}
+
+# Function
+## Average Rate of Forgetting for Every Participant in Each Lesson
+
+average_ROF_participants <- function(data, xlim = NULL, ylim = NULL, userId = "userId") {
+  if(missing(data)){
+    stop("No data is provided")
+  }
+  if(!("repetition" %in% colnames(data))){
+    stop("No repetition column is provided in the data, run calculate_repetition() to add a repetition column to the data")
+  }
+  if(!("alpha" %in% colnames(data))){
+    stop("No alpha column is provided in the data, run calculate_alpha_and_activation() to add an alpha column to the data")
+  }
+  
+    # Prints a message when the column contains missing values
+missing_values_message <- function(data, columns) {
+  indx <- apply(data, 2, function(x) any(is.na(x)))
+  for(col in columns){
+    if(col %in% colnames(data)[indx]){
+      cat("! There are missing values in the column ", col, " ! \n")
+    }
+  }
+}
+
+# Returns a non-empty vector when a column is missing
+  
+  missing_columns_check <- function(data, columns) {
+  missingcols <- character(0)
+  for(col in columns){
+    if(!(col %in% colnames(data))){
+      missingcols[[1]] <- col
+    }
+  }
+  return(missingcols)
+}
+  
+  missingcol <- missing_columns_check(data, c("sessionId", "alpha", "repetition", "lessonId", "userId", "presentationStartTime", "factId"))
+  if(length(missingcol) > 0){
+    stop("No ", missingcol[[1]] ," column is provided in the data")
+  }
+
+  if(!(is.null(xlim) | length(xlim) == 2)){
+    stop("xlim must be a vector of 2")
+  }
+  if(!(is.null(ylim) | length(ylim) == 2)){
+    stop("ylim must be a vector of 2")
+  }
+
+  if(-1 %in% data$factId){
+    data <- resetremoval(data)
+    cat("- There are resets present in the data. Reset data is excluded in this function. - \n")
+  }
+
+  missing_values_message(data, c("sessionId", "alpha", "repetition"))
+  
+    #Only the first session of a user within a lesson is kept in the data
+firstsession <- function(df) {
+  dfgroup <- dplyr::group_by(df, lessonId, userId)
+  dfsort <- dplyr::arrange(dfgroup, presentationStartTime, .by_group = TRUE)
+  dfclean <- dplyr::filter(dfsort, sessionId == unique(sessionId)[1])
+  dffree <- dplyr::ungroup(dfclean)
+  return(dffree)
+}
+
+  data <- firstsession(data)
+
+  participants <- sort(unique(data$userId))
+  partcolor <- viridis::turbo(length(participants))
+  names(partcolor)  <- participants
+
+  cat("This may take a moment... \n")
+  plotTitle <- paste("RoF for Each Participant")
+  plot <- NULL
+
+  # Group by sessionId and repetition, then mean alpha as new column
+  dat1 <- dplyr::group_by(.data = data, userId, repetition)
+  dat2 <- dplyr::summarise(.data = dat1, mean_alpha = mean(alpha, na.rm=TRUE),Participant = unique(.data[[userId]])[[1]])
+  dat2$Participant = substr(dat2$Participant, 1, 10)
+  dat3 <- dplyr::group_by(.data = dat2, userId)
+  dat4 <- dplyr::filter(.data = dat3, repetition == max(repetition))
+  dat5 <- dat4[order(dat4$mean_alpha, decreasing = TRUE),]
+
+  y = ylim
+  x = xlim
+
+  # Make plot
+  plot <- ggplot2::ggplot(data = dat2, ggplot2::aes(x = factor(repetition), y = mean_alpha, group = userId)) +
+    ggplot2::geom_line(alpha = 1, ggplot2::aes(colour = factor(userId))) +
+    ggplot2::geom_point(alpha = 0.5, size = 1, ggplot2::aes(colour = factor(userId), fill = factor(userId))) +
+    ggplot2::geom_point(data = dat5, alpha = 0.5, size = 3, position = ggplot2::position_jitter(w = 0.08, h = 0), ggplot2::aes(colour = factor(userId), fill = factor(userId))) +
+    ggplot2::scale_color_manual(name="Participants", labels = dat5$Participant,values = partcolor, breaks=dat5$userId) +
+    ggplot2::guides(fill = "none") +
+    ggplot2::coord_cartesian(xlim = x, ylim = y) +
+    ggplot2::labs(x = "Fact Repetitions", y = "Alpha") +
+    theme_pander() +
+    ggplot2::theme(legend.position="right") +
+    ggplot2::guides(colour=ggplot2::guide_legend(nrow=18, byrow=FALSE)) +
+    ggplot2::ggtitle(plotTitle)
+    
+  plot
+
+    
+}   
+
+```
+
+## Average Rate of Forgetting for Every Fact 
+
+```{r}
+average_ROF_facts(Pasta, factNames = "factAnswer")
+average_ROF_facts(Swahili1, factNames = "factAnswer")
+average_ROF_facts(Flowers, factNames = "factAnswer")
+average_ROF_facts(Capitals, factNames = "factAnswer")
+average_ROF_facts(Birds, factNames = "factAnswer")
+average_ROF_facts(News, factNames = "factAnswer")
+average_ROF_facts(Flags, factNames = "factAnswer")
+
+```
+
+## Average Rate of Forgetting for Every Participant in Each Lesson (Interactive)
+
+```{r}
+average_ROF_participants_interactive(Pasta, userId = "userId")
+average_ROF_participants_interactive(Swahili1, userId = "userId")
+average_ROF_participants_interactive(Flowers, userId = "userId")
+average_ROF_participants_interactive(Capitals, userId = "userId")
+average_ROF_participants_interactive(Birds, userId = "userId")
+average_ROF_participants_interactive(News, userId = "userId")
+average_ROF_participants_interactive(Flags, userId = "userId")
+
+```
+
+## Average Rate of Forgetting for Every Participant in Each Lesson
+
 ```{r}
 average_ROF_participants(Pasta, userId = "userId")
+average_ROF_participants(Swahili1, userId = "userId")
+average_ROF_participants(Flowers, userId = "userId")
+average_ROF_participants(Capitals, userId = "userId")
+average_ROF_participants(Birds, userId = "userId")
+average_ROF_participants(News, userId = "userId")
+average_ROF_participants(Flags, userId = "userId")
 
-```
-
-```{r}
-p1 <- average_ROF_participants(Pasta)
-p2 <- average_ROF_participants(Swahili1)
-p3 <- average_ROF_participants(Flowers)
-p4 <- average_ROF_participants(Capitals)
-
-plot_grid(p1, labels=c("Pasta", "Swahili", "Flowers", "Capitals"), ncol = 2, nrow =2)
-```
-```{r}
-p5 <- average_ROF_participants(Birds)
-p6 <- average_ROF_participants(News)
-p7 <- average_ROF_participants(Flags)
-p8 <- average_ROF_participants(Birds)
-
-plot_grid(p5,p6,p7,p8, labels=c("Birds", "News", "Flags", "Birds"), ncol = 2, nrow =2)
-
-```
-
-
-
-
-```{r, Accfact, echo=FALSE, fig.cap="Accuracy of each fact"}
-
-Pasta$userId <- as.character(Pasta$userId)
-Pasta$factAnswer <- as.character(Pasta$factAnswer)
-Pasta <- Pasta %>%
-  mutate(paired= factor(factAnswer)) 
-
-graph.clinical=ggplot(Pasta, aes(x=repetition, y=alpha, text=paste0(factAnswer))) +
-  #geom_boxplot(size=0.3) +
-  geom_line(aes(group=paired), size=0.2, position=position_dodge(0))+
-  geom_point(aes(fill=factAnswer, group=paired), size=1, shape=20, stroke=0, position=position_dodge(0))+
-  xlab("Lesson") +
-  #scale_x_discrete(labels=xlabels) +
-  ylab("Mean Accuracy") +
-  ggtitle("Accuracy by Participant") +
-  labs(fill="Fact") +
-  theme_pander() +
-  theme(axis.title.x=element_blank(),
-        panel.grid.major = element_blank())
-
-ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
-  layout(legend = list(orientation = "h")) %>% 
-  config(displayModeBar=FALSE)
 ```

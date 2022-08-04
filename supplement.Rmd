@@ -55,7 +55,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-02.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-03.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -178,28 +178,92 @@ firstsession <- function(df) {
   dat4 <- dplyr::filter(.data = dat3, repetition == max(repetition))
   dat5 <- dat4[order(dat4$mean_alpha, decreasing = TRUE),]
 
-  y = ylim
-  x = xlim
+ # y = ylim
+  #x = xlim
 
   # Make plot HH
-  plot <- ggplot2::ggplot(data = dat2, ggplot2::aes(x = factor(repetition), y = mean_alpha, group = factId)) +
-    ggplot2::geom_line(alpha = 1, ggplot2::aes(colour = factor(factId))) +
-    ggplot2::geom_point(alpha = 0.5, size = 1, ggplot2::aes(colour = factor(factId), fill = factor(factId))) +
-    ggplot2::geom_point(data = dat5, alpha = 0.5, size = 3, position = ggplot2::position_jitter(w = 0.08, h = 0), ggplot2::aes(colour = factor(factId), fill = factor(factId))) +
-    ggplot2::scale_color_manual(name="Facts", labels = dat5$factLabels,values = factcolor, breaks=dat5$factId) +
-    ggplot2::guides(fill = "none") +
-    ggplot2::coord_cartesian(xlim = x, ylim = y) +
-    ggplot2::labs(x = "Fact Repetitions", y = "Alpha") +
-    theme_pander() +
-    ggplot2::theme(legend.position="right") +
-    ggplot2::guides(colour=ggplot2::guide_legend(nrow=18, byrow=FALSE)) +
-    ggplot2::ggtitle(plotTitle)
+  #plot <- ggplot2::ggplot(data = dat2, ggplot2::aes(x = factor(repetition), y = mean_alpha, group = factId)) +
+   # ggplot2::geom_line(alpha = 1, ggplot2::aes(colour = factor(factId))) +
+  #  ggplot2::geom_point(alpha = 0.5, size = 1, ggplot2::aes(colour = factor(factId), fill = factor(factId))) +
+   # ggplot2::geom_point(data = dat5, alpha = 0.5, size = 3, position = ggplot2::position_jitter(w = 0.08, h = 0), ggplot2::aes(colour = factor(factId), fill = factor(factId))) +
+  #  ggplot2::scale_color_manual(name="Facts", labels = dat5$factLabels,values = factcolor, breaks=dat5$factId) +
+   # ggplot2::guides(fill = "none") +
+    #ggplot2::coord_cartesian(xlim = x, ylim = y) +
+  #  ggplot2::labs(x = "Fact Repetitions", y = "Alpha") +
+   # theme_pander() +
+    #ggplot2::theme(legend.position="right") +
+    #ggplot2::guides(colour=ggplot2::guide_legend(nrow=18, byrow=FALSE)) +
+    #ggplot2::ggtitle(plotTitle)
   
-  plot
+  #plot
   
 }
 ```
 
+
+```{r}
+Pasta_AVG_RoF_Facts <- Pasta %>%
+  average_ROF_facts()
+
+Pasta_AVG_RoF_Facts <- inner_join(Pasta, Pasta_AVG_RoF_Facts)
+
+```
+```{r}
+
+Pasta_RoF <- Pasta_AVG_RoF_Facts %>%
+  group_by(factId, repetition) %>%
+  summarise(mean_alpha = mean(alpha, na.rm=TRUE), factLabels = unique(factNames)) factLabels = substr(factLabels, 1, 10) %>%
+  group_by(factId) %>% 
+  filter(repetition == max(repetition)) %>% 
+  order(mean_alpha, decreasing = TRUE)
+
+  facts <- sort(unique(Pasta_AVG_RoF_Facts$factId))
+  factcolor <- viridis::turbo(length(facts))
+  names(factcolor)  <- facts
+
+Pasta_RoF <- Pasta_AVG_RoF_Facts %>%
+  group_by(factId, repetition) %>%
+  summarise(mean_alpha = mean(alpha, na.rm=TRUE), factLabels = unique(factId))
+  Pasta_AVG_RoF_Facts$factLabels = substr(Pasta_AVG_RoF_Facts$factLabels, 1, 10))
+  
+  dat3 <- group_by(.data = dat2, factId)
+  dat4 <- dplyr::filter(.data = dat3, repetition == max(repetition))
+  dat5 <- dat4[order(dat4$mean_alpha, decreasing = TRUE),]
+
+```
+
+  dat1 <- dplyr::group_by(.data = data, factId, repetition)
+  dat2 <- dplyr::summarise(.data = dat1, mean_alpha = mean(alpha, na.rm=TRUE), factLabels = unique(.data[[factNames]])[[1]])
+  dat2$factLabels = substr(dat2$factLabels, 1, 10)
+  dat3 <- dplyr::group_by(.data = dat2, factId)
+  dat4 <- dplyr::filter(.data = dat3, repetition == max(repetition))
+  dat5 <- dat4[order(dat4$mean_alpha, decreasing = TRUE),]
+
+```
+
+```{r}
+
+
+  #  Make plot HH
+  plot <- ggplot(Pasta_AVG_RoF_Facts, aes(x = factor(repetition), y = mean_alpha, group = factId)) +
+    geom_line(alpha = 1, aes(colour = factor(factId))) +
+    geom_point(alpha = 0.5, size = 1, aes(colour = factor(factId), fill = factor(factId))) +
+    geom_point(Pasta_AVG_RoF_Facts, alpha = 0.5, size = 3, position = position_jitter(w = 0.08, h = 0), aes(colour = factor(factId), fill = factor(factId))) +
+    scale_color_manual(name="Facts", labels = factLabels,values = factcolor, breaks=factId) +
+    guides(fill = "none") +
+    coord_cartesian(xlim = x, ylim = y) +
+    labs(x = "Fact Repetitions", y = "Alpha") +
+    theme_pander() +
+    theme(legend.position="right") +
+    guides(colour=guide_legend(nrow=18, byrow=FALSE)) +
+    ggtitle(plotTitle)
+  
+  plot
+```
+
+
+
+```
 
 ```{r, echo=FALSE, results= 'hide'}
 
@@ -421,9 +485,9 @@ firstsession <- function(df) {
 }    
 ```
 
-## Fact RoF
+## Lesson Facts RoF
 
-### Average Rate of Forgetting for Every Fact 
+### Average Rate of Forgetting for Each Lesson's Facts
 
 ```{r}
 average_ROF_facts(Pasta, factNames = "factAnswer")
@@ -435,8 +499,19 @@ average_ROF_facts(News, factNames = "factAnswer")
 average_ROF_facts(Flags, factNames = "factAnswer")
 
 ```
+```{r}
+average_ROF_facts(Pasta, factNames = "factAnswer")
+average_ROF_facts(Swahili1, factNames = "factAnswer")
+average_ROF_facts(Flowers, factNames = "factAnswer")
+average_ROF_facts(Capitals, factNames = "factAnswer")
+average_ROF_facts(Birds, factNames = "factAnswer")
+average_ROF_facts(News, factNames = "factAnswer")
+average_ROF_facts(Flags, factNames = "factAnswer")
 
-## Lesson RoF
+```
+
+
+## Lesson Participant RoF
 
 ### Average Rate of Forgetting for Every Participant in Each Lesson
 
