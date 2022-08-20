@@ -55,7 +55,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-03.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-18.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -75,10 +75,328 @@ data <- data %>%
 ```
 ```{r, echo=FALSE, results= 'hide'}
 
+
 # Group by Clinical Status
 data <- inner_join(data, groups)
 
 ```
+
+```{r}
+
+# Filter the sessions
+sessionData <- data %>% 
+  group_by(userId, sessionId, lessonId, lessonTitle) %>% 
+  summarize(duration = (max(presentationStartTime) - min(presentationStartTime))/60000,
+            start = min(presentationStartTime),
+            legit = if_else(duration > 6, T, F)) 
+
+sessionData <- sessionData %>% 
+  group_by(userId, lessonId, lessonTitle) %>% 
+  arrange(start, by_group=T) %>%
+  mutate(sessionRank = seq(1, length(start)))
+
+sessionDataFiltered <- sessionData %>%
+  filter(legit == T) %>%
+  group_by(userId, lessonId) %>%
+  mutate(minRank = min(sessionRank))
+
+sessionData <- sessionData %>%
+  inner_join(sessionDataFiltered) %>%
+  mutate(usable = if_else(minRank == sessionRank, T, F))
+
+
+cleandata <- inner_join(sessionData, data) %>%
+  filter(usable == T)
+
+cleandata$userId <- as.character(cleandata$userId)
+
+# Change reactionTime from ms to s
+cleandata$reactionTime <- (cleandata$reactionTime/1000)
+
+
+```
+
+```{r}
+
+# Filter by task 
+Pasta=filter(cleandata,lessonTitle=='Pasta')
+Swahili1=filter(cleandata,lessonTitle=='Swahili 1')
+Flowers=filter(cleandata,lessonTitle=='Flowers')  
+Capitals=filter(cleandata,lessonTitle=='European Capitals 1') 
+Birds=filter(cleandata,lessonTitle=='Birds') 
+News=filter(cleandata,lessonTitle=='Newspapers') 
+Flags=filter(cleandata,lessonTitle=='Asian Flags') 
+Folktales=filter(cleandata,lessonTitle=='Folktales') 
+Maps=filter(cleandata,lessonTitle=='Maps') 
+USTowns=filter(cleandata,lessonTitle=='US Towns 1') 
+
+```
+
+## Lesson Fact Reaction Times
+
+```{r, echo=FALSE}
+
+ggplot(data, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time") +
+  ggtitle("Reaction Time for Each Fact (unfiltered)") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+# filtered for complete session data
+ggplot(cleandata, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time") +
+  ggtitle("Reaction Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+ggplot(Pasta, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Pasta: Reaction Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+
+ggplot(Swahili1, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Swahili: Reaction Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+
+ggplot(Flowers, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Flowers: Reaction Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+
+ggplot(Capitals, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Capitals: Reaction Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+
+ggplot(Birds, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Birds: Reaction Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+
+ggplot(News, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("News: Reaction Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+
+ggplot(Flags, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Flags: Reaction Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+
+ggplot(Folktales, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Folktales: Reaction Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+
+ggplot(Maps, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Maps: Reaction Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
+
+
+#ggplot(USTowns1, aes(x=factAnswer, y=reactionTime))+
+ # geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+  #     xlab("Fact") +
+ # ylab("Reaction Time (ms)") +
+ # ggtitle("US Towns 1: Reaction Time for Each Fact") +
+ # theme_pander() +
+ # theme(legend.position = "none",
+     #   axis.text.x = element_text (angle=90))
+
+```
+
+### Reaction Time for each fact (interactive)
+
+```{r, echo=FALSE}
+
+graph=ggplot(Pasta, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Pasta: Reaction Time for Each Fact") +
+  labs(col="Participant") +
+  theme_pander() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90))
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+
+graph=ggplot(Swahili1, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Swahili: Reaction Time for Each Fact") +
+  labs(col="Participant") +
+  theme_pander() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90))
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+
+graph=ggplot(Flowers, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Flowers: Reaction Time for Each Fact") +
+  labs(col="Participant") +
+  theme_pander() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90))
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+
+graph=ggplot(Capitals, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Capitals: Reaction Time for Each Fact") +
+  labs(col="Participant") +
+  theme_pander() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90))
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+
+graph=ggplot(Birds, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Birds: Reaction Time for Each Fact") +
+  labs(col="Participant") +
+  theme_pander() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90))
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+
+graph=ggplot(News, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("News: Reaction Time for Each Fact") +
+  labs(col="Participant") +
+  theme_pander() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90))
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+
+graph=ggplot(Flags, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Flags: Reaction Time for Each Fact") +
+  labs(col="Participant") +
+  theme_pander() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90))
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+
+graph=ggplot(Folktales, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Folktales: Reaction Time for Each Fact") +
+  labs(col="Participant") +
+  theme_pander() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90),
+        panel.grid.major = element_blank())
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+
+graph=ggplot(Maps, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("Reaction Time (ms)") +
+  ggtitle("Maps: Reaction Time for Each Fact") +
+  labs(col="Participant") +
+  theme_pander() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90),
+        panel.grid.major = element_blank())
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
+
+
+#graph=ggplot(USTowns1, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+ # geom_point(size=1, position=position_jitter(0.1)) +
+  #     xlab("Fact") +
+  #ylab("Reaction Time (ms)") +
+  #ggtitle("US Towns 1: Reaction Time for Each Fact") +
+  #labs(col="Participant") +
+  #theme_pander() +
+  #theme(legend.position = "right",
+   #     axis.text.x = element_text (angle=90),
+    #    panel.grid.major = element_blank())
+#ggplotly(graph, tooltip=c("y", "text")) %>% 
+ # config(displayModeBar=FALSE)
+
+
+
+
+```
+
 
 ```{r, echo=FALSE, results= 'hide'}
 
@@ -90,6 +408,7 @@ Capitals=filter(data,lessonTitle=='European Capitals 1')
 Birds=filter(data,lessonTitle=='Birds') 
 News=filter(data,lessonTitle=='Newspapers') 
 Flags=filter(data,lessonTitle=='Asian Flags') 
+Folktales=filter(data,lessonTitle=='Folktales') 
 
 ```
 
@@ -208,62 +527,28 @@ Pasta_AVG_RoF_Facts <- Pasta %>%
 Pasta_AVG_RoF_Facts <- inner_join(Pasta, Pasta_AVG_RoF_Facts)
 
 ```
-```{r}
-
-Pasta_RoF <- Pasta_AVG_RoF_Facts %>%
-  group_by(factId, repetition) %>%
-  summarise(mean_alpha = mean(alpha, na.rm=TRUE), factLabels = unique(factNames)) factLabels = substr(factLabels, 1, 10) %>%
-  group_by(factId) %>% 
-  filter(repetition == max(repetition)) %>% 
-  order(mean_alpha, decreasing = TRUE)
-
-  facts <- sort(unique(Pasta_AVG_RoF_Facts$factId))
-  factcolor <- viridis::turbo(length(facts))
-  names(factcolor)  <- facts
-
-Pasta_RoF <- Pasta_AVG_RoF_Facts %>%
-  group_by(factId, repetition) %>%
-  summarise(mean_alpha = mean(alpha, na.rm=TRUE), factLabels = unique(factId))
-  Pasta_AVG_RoF_Facts$factLabels = substr(Pasta_AVG_RoF_Facts$factLabels, 1, 10))
-  
-  dat3 <- group_by(.data = dat2, factId)
-  dat4 <- dplyr::filter(.data = dat3, repetition == max(repetition))
-  dat5 <- dat4[order(dat4$mean_alpha, decreasing = TRUE),]
-
-```
-
-  dat1 <- dplyr::group_by(.data = data, factId, repetition)
-  dat2 <- dplyr::summarise(.data = dat1, mean_alpha = mean(alpha, na.rm=TRUE), factLabels = unique(.data[[factNames]])[[1]])
-  dat2$factLabels = substr(dat2$factLabels, 1, 10)
-  dat3 <- dplyr::group_by(.data = dat2, factId)
-  dat4 <- dplyr::filter(.data = dat3, repetition == max(repetition))
-  dat5 <- dat4[order(dat4$mean_alpha, decreasing = TRUE),]
-
-```
 
 ```{r}
 
 
   #  Make plot HH
-  plot <- ggplot(Pasta_AVG_RoF_Facts, aes(x = factor(repetition), y = mean_alpha, group = factId)) +
-    geom_line(alpha = 1, aes(colour = factor(factId))) +
-    geom_point(alpha = 0.5, size = 1, aes(colour = factor(factId), fill = factor(factId))) +
-    geom_point(Pasta_AVG_RoF_Facts, alpha = 0.5, size = 3, position = position_jitter(w = 0.08, h = 0), aes(colour = factor(factId), fill = factor(factId))) +
-    scale_color_manual(name="Facts", labels = factLabels,values = factcolor, breaks=factId) +
-    guides(fill = "none") +
-    coord_cartesian(xlim = x, ylim = y) +
-    labs(x = "Fact Repetitions", y = "Alpha") +
-    theme_pander() +
-    theme(legend.position="right") +
-    guides(colour=guide_legend(nrow=18, byrow=FALSE)) +
-    ggtitle(plotTitle)
+ # plot <- ggplot(Pasta_AVG_RoF_Facts, aes(x = factor(repetition), y = mean_alpha, group = factId)) +
+   # geom_line(alpha = 1, aes(colour = factor(factId))) +
+  #  geom_point(alpha = 0.5, size = 1, aes(colour = factor(factId), fill = factor(factId))) +
+  #  geom_point(Pasta_AVG_RoF_Facts, alpha = 0.5, size = 3, position = position_jitter(w = 0.08, h = 0), aes(colour = factor(factId), fill = factor(factId))) +
+  #  scale_color_manual(name="Facts", labels = factLabels,values = factcolor, breaks=factId) +
+  #  guides(fill = "none") +
+  #  coord_cartesian(xlim = x, ylim = y) +
+  #  labs(x = "Fact Repetitions", y = "Alpha") +
+  #  theme_pander() +
+ #   theme(legend.position="right") +
+  #  guides(colour=guide_legend(nrow=18, byrow=FALSE)) +
+  #  ggtitle(plotTitle)
   
-  plot
+ # plot
 ```
 
 
-
-```
 
 ```{r, echo=FALSE, results= 'hide'}
 

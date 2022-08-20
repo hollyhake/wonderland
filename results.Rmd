@@ -55,7 +55,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-04.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-20.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -125,27 +125,37 @@ clinical <- inner_join(data_avg, groups) %>%
   inner_join(sessionData) %>%
   filter(usable == T)
 
+
 ```
+
 
 ```{r, echo=FALSE}
 clinical$userId <- as.character(clinical$userId)
 clinical <- clinical %>%
   mutate(paired= factor(userId))
 
+# Change responseTime from ms to s
+clinical$responseTime <- (clinical$responseTime/1000)
+
 # Delete practice
 clinical <- clinical[!(clinical$lessonTitle=="01 Practice"), ]
 
-# Order the lessons by week
-clinical$level_order<- factor(clinical$lessonTitle, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales'))
+# **Testing taking out outlier participant lessons
+clinical <- clinical[-c(67,70,72,73,87), ] 
+clinical <- clinical[!(clinical$userId=="69415"), ]
 
-xlabels <- c("Pasta", "Swahili", "Flowers", "Capitals", "Birds","News", "Flags", "Folktales")
+
+# Order the lessons by week
+clinical$level_order<- factor(clinical$lessonTitle, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales', 'Maps', 'US Towns 1'))
+
+xlabels <- c("Pasta", "Swahili", "Flowers", "Capitals", "Birds","News", "Flags", "Folktales", "Maps", "Towns")
 
 clinical %>% 
   group_by(level_order, clinicalStatus) %>% 
   summarise(n=length(userId)) %>%
   pivot_wider(names_from=clinicalStatus, values_from = n) %>%
   kbl(caption= "Number of Control and MCI participants that completed each lesson", col.names = c("Lesson", "Control", "MCI")) %>%
-  kable_paper(full_width = F) 
+  kable_paper(full_width = T) 
 
 
 
@@ -154,54 +164,62 @@ clinical %>%
  # column_spec(1, image = spec_image(c("C:/Users/17203/Documents/wonderland/images/flowers.png","C:/Users/17203/Documents/wonderland/images/birds.png", "C:/Users/17203/Documents/wonderland/images/birds.png", "C:/Users/17203/Documents/wonderland/images/birds.png", "C:/Users/17203/Documents/wonderland/images/birds.png","C:/Users/17203/Documents/wonderland/images/birds.png","C:/Users/17203/Documents/wonderland/images/birds.png"), 50, 50))
 ```
 
-## Accuracy and Response Time
+## Accuracy 
 
-```{r, Acc, echo=FALSE, fig.cap="Accuracy and Response Time Across Lessons"}
+```{r, Acc, echo=FALSE, fig.cap="Accuracy Across Lessons"}
 
 PAcc1=ggplot(clinical, aes(x=level_order, y=correct, col=lessonTitle, fill=lessonTitle)) +
-  geom_violin(width=1, alpha=0.2) +
+  #geom_violin(width=1, alpha=0.2) +
   geom_boxplot(width=.5, alpha=0.2) +
   #stat_summary(fun.y=mean, geom="pointrange", size=0.3, shape= 1, color="black") +
-  geom_point(size=3, position=position_jitter(0.1)) +
+  geom_point(size=2, position=position_jitter(0.1)) +
   xlab("Lesson") +
   scale_x_discrete(labels=xlabels) +
-  ylab("Accuracy") +
+  ylab("accuracy") +
   ggtitle("Accuracy Across Lessons") +
   theme_pander() +
   theme(legend.position = "none",
         axis.title.x=element_blank())
 
-PRT1=ggplot(clinical, aes(x=level_order, y=responseTime, col=lessonTitle, fill=lessonTitle)) +
-  geom_violin(width=1, alpha=0.2) +
-  geom_boxplot(width=.5, alpha=0.2) +
-  #stat_summary(fun.y=mean, geom="pointrange", size=0.3, shape= 1, color="black") +
-  geom_point(size=3, position=position_jitter(0.1)) +
+PAcc2=ggplot(clinical, aes(y = correct, x = level_order, col = clinicalStatus, fill = clinicalStatus)) +
+  #geom_violin(alpha=0.2) +
+  geom_boxplot(alpha=0.25) +
+  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
+  geom_point(size=2, position=position_jitter(0.1)) +
+  #stat_summary(geom="ribbon", fun.dat="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
+  #stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
+  scale_color_manual(values=c("gold3", "purple3")) +
+  scale_fill_manual(values=c("gold3", "purple3")) +
   xlab("Lesson") +
   scale_x_discrete(labels=xlabels) +
-  ylab("Response Time (ms)") +
-  ggtitle("Response Time Across Lessons") +
+  ylab("accuracy") +
+  ggtitle(" ") +
+ # ggtitle("Accuracy Across Lessons By Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
   theme_pander() +
   theme(legend.position = "none",
-        axis.title.x=element_blank())
+        axis.title.x = element_blank()) 
 
 
-plot_grid(PAcc1, PRT1, ncol = 1, nrow = 2)
+
+plot_grid(PAcc1, PAcc2, ncol = 1, nrow = 2)
 
 ```
 
-Both the accuracy and response times were averaged for each participant in each lesson they completed (fig \@ref(fig:Acc)). 
+
+Accuracy (fig \@ref(fig:Acc)) scores were averaged for each participant in each lesson they completed. 
 
 ```{r, Accp, echo=FALSE, fig.cap="Accuracy by Participant"}
 
 graph.clinical=ggplot(clinical, aes(x=level_order, y=correct, text=paste0(userId))) +
-  geom_boxplot(size=0.3) +
-  geom_line(aes(group=paired), size=0.2, position=position_dodge(0))+
-  geom_point(aes(fill=userId, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0))+
+  geom_boxplot(size=0.1) +
+  geom_line(aes(group=userId, col=userId), size=0.1, position=position_dodge(0)) +
+  geom_point(aes(fill=userId, group=paired), size=2, shape=20, stroke=0, position=position_dodge(0)) +
   xlab("Lesson") +
   scale_x_discrete(labels=xlabels) +
-  ylab("Mean Accuracy") +
+  ylab("mean accuracy") +
   ggtitle("Accuracy by Participant") +
-  labs(fill="Participant") +
+  labs(fill="Participant", col="Participant") +
   theme_pander() +
   theme(axis.title.x=element_blank(),
         panel.grid.major = element_blank())
@@ -219,14 +237,14 @@ This graph is interactive (fig \@ref(fig:Accp)). Hover over the data points to g
 ```{r, AccC, echo=FALSE, fig.cap="Accuracy by Clinical Status"}
 
 graph.clinical=ggplot(clinical, aes(x=level_order, y=correct, col=clinicalStatus, fill=clinicalStatus, text=paste0(userId)))+
-  geom_boxplot(size =0.3, alpha=0.1) +
-  geom_line(aes(group=paired), size=0.2, position=position_dodge(0)) +
-  geom_point(aes(fill=clinicalStatus, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0)) +
+  geom_boxplot(size =0.1, alpha=0.2) +
+  geom_line(aes(group=paired), size=0.1, position=position_dodge(0)) +
+  geom_point(aes(fill=clinicalStatus, group=paired), size=2, shape=20, stroke=0, position=position_dodge(0)) +
   scale_color_manual(values = c("gold3", "purple3")) +
   scale_fill_manual(values = c("gold3", "purple3")) +
   xlab("Lesson") +
   scale_x_discrete(labels=xlabels) +
-  ylab("Mean Accuracy") +
+  ylab("mean accuracy") +
   ggtitle("Accuracy by Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
   theme_pander() +
@@ -241,17 +259,62 @@ ggplotly(graph.clinical, tooltip=c("y", "text")) %>%
 
 This graph separates the participants by clinical status (fig \@ref(fig:AccC)). Participants with MCI tend to have less accuracy compared to the controls.  
 
+## Response Time
+
+```{r, RT, echo=FALSE, fig.cap="Response Time Across Lessons"}
+
+PRT1=ggplot(clinical, aes(x=level_order, y=responseTime, col=lessonTitle, fill=lessonTitle)) +
+  #geom_violin(width=1, alpha=0.2) +
+  geom_boxplot(width=.5, alpha=0.2) +
+  #stat_summary(fun.y=mean, geom="pointrange", size=0.3, shape= 1, color="black") +
+  geom_point(size=2, position=position_jitter(0.1)) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("sec") +
+  ggtitle("Response Time Across Lessons") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.title.x=element_blank())
+
+PRT2=ggplot(clinical, aes(y=responseTime, x=level_order, col=clinicalStatus, fill=clinicalStatus)) +
+  #geom_violin(alpha=0.2) +
+  geom_boxplot(alpha=0.25) +
+  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
+  geom_point(size=2, position=position_jitter(0.1)) +
+  #stat_summary(geom="ribbon", fun.dat="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
+  #stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
+  scale_color_manual(values=c("gold3", "purple3")) +
+  scale_fill_manual(values=c("gold3", "purple3")) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("sec") +
+  ggtitle(" ") +
+ # ggtitle("Response Time Across Lessons by Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.title.x = element_blank()) 
+
+
+
+plot_grid(PRT1, PRT2, ncol = 1, nrow = 2)
+
+```
+
+Response times (fig \@ref(fig:RT)) were averaged for each participant in each lesson they completed. 
+
+
 ```{r, RTp, echo=FALSE, fig.cap="Response Time by Participant"}
 
 graph.clinical=ggplot(clinical, aes(x=level_order, y=responseTime, text=paste0(userId))) +
-  geom_boxplot(size=0.3) +
-  geom_line(aes(group=paired), size=0.2, position=position_dodge(0))+
-  geom_point(aes(fill=userId, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0))+
+  geom_boxplot(size=0.1) +
+  geom_line(aes(group=userId, col=userId), size=0.1, position=position_dodge(0)) +
+  geom_point(aes(fill=userId, group=paired), size=2, shape=20, stroke=0, position=position_dodge(0)) +
   xlab("Lesson") +
   scale_x_discrete(labels=xlabels) +
-  ylab("Mean Response Time (ms)") +
+  ylab("sec") +
   ggtitle("Response Time by Participant") +
-  labs(fill="Participant") +
+  labs(fill="Participant", col="Participant") +
   theme_pander() +
   theme(axis.title.x=element_blank(),
         panel.grid.major = element_blank())
@@ -266,14 +329,14 @@ The graph is interactive (fig \@ref(fig:RTp)). Hover over the data points to get
 ```{r, RTc, echo=FALSE, fig.cap="Response Time by Clinical Status"}
 
 graph.clinical=ggplot(clinical, aes(x=level_order, y=responseTime, col=clinicalStatus, fill=clinicalStatus, text=paste0(userId)))+
-  geom_boxplot(size =0.3, alpha=0.1) +
-  geom_line(aes(group=paired), size=0.2, position=position_dodge(0)) +
-  geom_point(aes(fill=clinicalStatus, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0)) +
+  geom_boxplot(size =0.1, alpha=0.2) +
+  geom_line(aes(group=paired), size=0.1, position=position_dodge(0)) +
+  geom_point(aes(fill=clinicalStatus, group=paired), size=2, shape=20, stroke=0, position=position_dodge(0)) +
   scale_color_manual(values = c("gold3", "purple3")) +
   scale_fill_manual(values = c("gold3", "purple3")) +
   xlab("Lesson") +
   scale_x_discrete(labels=xlabels) +
-  ylab("Mean Response Time (ms)") +
+  ylab("sec") +
   ggtitle("Response Time by Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
   theme_pander() +
@@ -289,38 +352,77 @@ ggplotly(graph.clinical, tooltip=c("y", "text")) %>%
 
 ## Rate of Forgetting 
 
-### Mean Rate of Forgetting 
-
 The mean Rate of Forgetting for each participant across all lessons. 
 
 ```{r, RoF, echo=FALSE, fig.cap="Rate of Forgetting Across Lessons"}
 
 ggplot(clinical, aes(x=level_order, y=MeanAlpha, col=lessonTitle, fill=lessonTitle)) +
-  geom_violin(width=2, alpha=0.2) +
-  geom_boxplot(width=.5, alpha=0.2) +
+  geom_violin(width=1, size=0.1, alpha=0.2) +
+  geom_boxplot(width=.4,size=0.1, alpha=0.2) +
   stat_summary(fun.y=mean, geom="pointrange", size=0.3, shape=1, color="black") +
   geom_point(size=3, position=position_jitter(0.1)) +
   xlab("Lesson") +
   scale_x_discrete(labels=xlabels) +
-  ylab("Mean Rate of Forgetting") +
+  ylab("mean alpha") +
   ggtitle("Rate of Forgetting Across Lessons") +
   theme_pander() +
   theme(legend.position="none")
 
 
 ```
+```{r, RoF1, echo=FALSE, fig.cap="Rate of Forgetting Across Lessons"}
+
+PRoF1=ggplot(clinical, aes(x=level_order, y=MeanAlpha, col=lessonTitle, fill=lessonTitle)) +
+  #geom_violin(width=1, alpha=0.2) +
+  geom_boxplot(width=.5, alpha=0.2) +
+  #stat_summary(fun.y=mean, geom="pointrange", size=0.3, shape= 1, color="black") +
+  geom_point(size=2, position=position_jitter(0.1)) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("alpha") +
+  ggtitle("Rate of Forgetting Across Lessons") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.title.x=element_blank())
+
+PRoF2=ggplot(clinical, aes(y=MeanAlpha, x=level_order, col=clinicalStatus, fill=clinicalStatus)) +
+  #geom_violin(alpha=0.2) +
+  geom_boxplot(alpha=0.25) +
+  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
+  geom_point(size=2, position=position_jitter(0.1)) +
+  #stat_summary(geom="ribbon", fun.dat="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
+  #stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
+  scale_color_manual(values=c("gold3", "purple3")) +
+  scale_fill_manual(values=c("gold3", "purple3")) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("alpha") +
+  ggtitle(" ") +
+ # ggtitle("Rate of Forgetting Across Lessons by Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.title.x = element_blank()) 
+
+
+
+plot_grid(PRoF1, PRoF2, ncol = 1, nrow = 2)
+
+```
+Rates of Forgetting 'alpha' (fig \@ref(fig:RoF1)) were averaged for each participant in each lesson they completed. 
+
 
 ```{r, RoFp, echo=FALSE, fig.cap="Rate of Forgetting by Participant"}
 
 graph.clinical=ggplot(clinical, aes(x=level_order, y=MeanAlpha, text=paste0(userId))) +
-  geom_boxplot(size=0.3) +
-  geom_line(aes(group=userId), size=0.2, position=position_dodge(0)) +
-  geom_point(aes(fill=userId, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0)) +
+  geom_boxplot(size=0.1) +
+  geom_line(aes(group=userId, col=userId), size=0.1, position=position_dodge(0)) +
+  geom_point(aes(fill=userId, group=paired), size=2, shape=20, stroke=0, position=position_dodge(0)) +
   xlab("Lesson") +
   scale_x_discrete(labels=xlabels) +
-  ylab("Mean Rate of forgetting") +
+  ylab("mean alpha") +
   ggtitle("Rate of Forgetting by Participant") +
-  labs(fill="Participant") +
+  labs(fill="Participant", col="Participant") +
   theme_pander() +
   theme(axis.title.x=element_blank(),
         panel.grid.major = element_blank())
@@ -335,14 +437,14 @@ ggplotly(graph.clinical, tooltip=c("y", "text")) %>%
 
 # Rate of Forgetting by Clinical Status
 graph.clinical=ggplot(clinical, aes(x=level_order, y=MeanAlpha,col=clinicalStatus, fill=clinicalStatus,text=paste0(userId))) +
-  geom_boxplot(size=0.3, alpha=0.2) +
-  geom_line(aes(group=paired), size=0.2, position=position_dodge(0)) +
-  geom_point(aes(fill=clinicalStatus, group=paired), size=3, shape=20, stroke=0, position=position_dodge(0)) +
+  geom_boxplot(size=0.1, alpha=0.2) +
+  geom_line(aes(group=paired), size=0.1, position=position_dodge(0)) +
+  geom_point(aes(fill=clinicalStatus, group=paired), size=2, shape=20, stroke=0, position=position_dodge(0)) +
   scale_color_manual(values = c("gold3", "purple3")) +
   scale_fill_manual(values = c("gold3", "purple3")) +
   xlab("Lesson") +
   scale_x_discrete(labels=xlabels) +
-  ylab("Mean Rate of Forgetting") +
+  ylab("mean alpha") +
   ggtitle("Rate of Forgetting by Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
   theme_pander() +
@@ -356,26 +458,9 @@ ggplotly(graph.clinical, tooltip=c("y", "text")) %>%
 ```
 Individuals with MCI tend to have a higher Rate of Forgetting than the age-matched controls (fig \@ref(fig:RoFC)).
 
-```{r, RoFAS, echo=FALSE, fig.cap="Rate of Forgetting by Clinical Status AS"}
+```{r, mmRoF, echo=FALSE, fig.cap="Mean and Median Rate of Forgetting by Clinical Status"}
 
-PRoF1=ggplot(clinical, aes(y = MeanAlpha, x = level_order, col = clinicalStatus, fill = clinicalStatus)) +
-  geom_boxplot(alpha=0.25) +
-  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
-  stat_summary(geom="point", fun.data="mean_sdl", size=3) +
-  #stat_summary(geom="ribbon", fun.dat="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
-  stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
-  scale_color_manual(values=c("gold3", "purple3")) +
-  scale_fill_manual(values=c("gold3", "purple3")) +
-  xlab("Lesson") +
-  scale_x_discrete(labels=xlabels) +
-  ylab("Mean Alpha") +
-  ggtitle("Rate of Forgetting By Clinical Status") +
-  labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
-  theme(legend.position = "none",
-        axis.title.x = element_blank()) 
-
-PRoF2=ggplot(clinical, aes(y=MeanAlpha, x =level_order, col=clinicalStatus, fill=clinicalStatus)) +
+PRoFmean=ggplot(clinical, aes(y=MeanAlpha, x =level_order, col=clinicalStatus, fill=clinicalStatus)) +
   #geom_boxplot() +
   #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
   stat_summary(geom="point", fun.data="mean_sdl", size=3) +
@@ -385,8 +470,24 @@ PRoF2=ggplot(clinical, aes(y=MeanAlpha, x =level_order, col=clinicalStatus, fill
   scale_fill_manual(values=c("gold3", "purple3")) +
   xlab("Lesson") +
   scale_x_discrete(labels=xlabels) +
-  ylab("Mean Alpha") +
-  ylim(0.3,0.5) +
+  ylab("mean alpha") +
+  ggtitle("Rate of Forgetting By Clinical Status") +
+  labs(col="Clinical Status", fill="Clinical Status") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.title.x = element_blank()) 
+
+PRoFmed=ggplot(clinical, aes(y=MedianAlpha, x =level_order, col=clinicalStatus, fill=clinicalStatus)) +
+  #geom_boxplot() +
+  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
+  stat_summary(geom="point", fun.data="mean_sdl", size=3) +
+  stat_summary(geom="ribbon", fun.dat ="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
+  stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
+  scale_color_manual(values=c("gold3", "purple3")) +
+  scale_fill_manual(values=c("gold3", "purple3")) +
+  xlab("Lesson") +
+  scale_x_discrete(labels=xlabels) +
+  ylab("median alpha") +
   #ggtitle("Rate of Forgetting By Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
   theme_pander() +
@@ -394,7 +495,7 @@ PRoF2=ggplot(clinical, aes(y=MeanAlpha, x =level_order, col=clinicalStatus, fill
         axis.title.x = element_blank()) 
 
 
-plot_grid(PRoF1, PRoF2, ncol = 1, nrow = 2)
+plot_grid(PRoFmean, PRoFmed, ncol = 1, nrow = 2)
   
 ```
 
@@ -407,53 +508,11 @@ RoFANOVA %>%
   xtable() %>%
   kbl(caption= "ANOVA using mean ROF as dependent variable and Clinical Status and Lesson as factors", digits = 4) %>%
   kable_paper(full_width = F) 
-```
 
-### Median Rate of Forgetting 
+```
 
 The median Rate of Forgetting for each participant across all lessons.
 
-```{r, MedRoFAS, echo=FALSE, fig.cap="Median Rate of Forgetting by Clinical Status AS"}
-
-PRoF3=ggplot(clinical, aes(y = MedianAlpha, x = level_order, col = clinicalStatus, fill = clinicalStatus)) +
-  geom_boxplot(alpha=0.25) +
-  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
-  stat_summary(geom="point", fun.data="mean_sdl", size=3) +
-  #stat_summary(geom="ribbon", fun.dat="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
-  stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
-  scale_color_manual(values=c("gold3", "purple3")) +
-  scale_fill_manual(values=c("gold3", "purple3")) +
-  xlab("Lesson") +
-  scale_x_discrete(labels=xlabels) +
-  ylab("Median Alpha") +
-  ggtitle("Rate of Forgetting By Clinical Status") +
-  labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
-  theme(legend.position = "none",
-        axis.title.x = element_blank()) 
-
-PRoF4=ggplot(clinical, aes(y=MedianAlpha, x =level_order, col=clinicalStatus, fill=clinicalStatus)) +
-  #geom_boxplot() +
-  #stat_summary(geom="errorbar", fun.data = "mean_se", width=0.1) +
-  stat_summary(geom="point", fun.data="mean_sdl", size=3) +
-  stat_summary(geom="ribbon", fun.dat ="mean_se", aes(group=clinicalStatus), col=NA, alpha=0.25) +
-  stat_summary(geom="line", fun="mean", aes(group=clinicalStatus)) +
-  scale_color_manual(values=c("gold3", "purple3")) +
-  scale_fill_manual(values=c("gold3", "purple3")) +
-  xlab("Lesson") +
-  scale_x_discrete(labels=xlabels) +
-  ylab("Median Alpha") +
-  ylim(0.3,0.5) +
-  #ggtitle("Rate of Forgetting By Clinical Status") +
-  labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
-  theme(legend.position = "bottom",
-        axis.title.x = element_blank()) 
-
-
-plot_grid(PRoF3, PRoF4, ncol = 1, nrow = 2)
-  
-```
 
 ```{r, RoFANOVAmed,echo=FALSE}
 RoFANOVAmed <- aov(MedianAlpha ~ (lessonTitle * clinicalStatus) + Error(userId/lessonTitle),
@@ -503,7 +562,7 @@ plot_grid(PRoFD1, PRoFD2, labels=c("A", "B"), ncol = 2, nrow = 1)
 
 ```
 
-This figure examines the distribution of ROF values for MCIs and controls, either across all sessions (A) or averaged across all sessions (B) (fig \@ref(fig:DisRoF)). The biggest point of difference, whether single session or averaged sessions, is at an alpha of about 0.37. The double bump in Figure \ref{fig:DisRoF}A is likely due to differences in task difficulty. An interesting point here is that there are some things that are easier for the the MCI than for the controls (shown by that middle section overlap) and this makes it harder for the classifier. If we could build a classifier that has a general idea of difficulty (for instance, have the threshold for “birds”-which is an easier task- be 0.35 instead of 0.37), it would be much better.  
+This figure examines the distribution of ROF values for MCIs and controls, either across all sessions (A) or averaged across all sessions (B) (fig \@ref(fig:DisRoF)). The biggest point of difference, whether single session or averaged sessions, is at an alpha of about #. The double bump in Figure \ref{fig:DisRoF}A is likely due to differences in task difficulty. An interesting point here is that there are some things that are easier for the the MCI than for the controls (shown by that middle section overlap) and this makes it harder for the classifier. If we could build a classifier that has a general idea of difficulty (for instance, have the threshold for “birds”-which is an easier task- be 0.35 instead of 0.37), it would be much better.  
 
 ## Classification accuracy
 
@@ -577,7 +636,7 @@ ggplot(arrange(curve, TPR), aes(x=TNR, y=TPR)) +
   theme_pander()
 ```
 
-This figure visualizes the ROC curve to see the classification accuracy at each RoF threshold (fig \@ref(fig:Class)). In this case, having a RoF value of 0.37 as the diagnostic threshold- that is people with an RoF of 0.37 and up are considered mildly cognitively impaired and people with an RoF less than are healthy controls- gives us a diagnostic classification accuracy of 76%. All together though, the global AUC for single session is `r AUC`.  
+This figure visualizes the ROC curve to see the classification accuracy at each RoF threshold (fig \@ref(fig:Class)). In this case, having a RoF value of 0.# as the diagnostic threshold- that is people with an RoF of 0.# and up are considered mildly cognitively impaired and people with an RoF less than are healthy controls- gives us a diagnostic classification accuracy of #%. All together though, the global AUC for single session is `r AUC`.  
 
 ```{r, results='hide', echo=FALSE}
 
@@ -649,3 +708,68 @@ ggplot(arrange(curve, TPR), aes(x=TNR, y=TPR)) +
 
 This figure visualizes the ROC curve to see the classification accuracy at each RoF threshold (fig \@ref(fig:Classavg)). The global AUC for averaged sessions is `r AVGAUC`.
 
+
+## RoF Correlations 
+
+```{r, results ='hide', echo=FALSE}
+
+# create a matrix of Participant by Lesson RoFs:
+
+clinical %>% 
+  pivot_wider(id_cols = lessonId, 
+              names_from = userId, 
+              values_from = MeanAlpha, 
+              names_prefix="sub") %>% 
+  ungroup() %>% 
+  select(-lessonId) %>% 
+  as.matrix() %>% 
+  t() %>%
+  cor(use="complete.obs") -> C
+
+# remove self-correlations
+C_noself <- C
+C_noself[C==1] <- NA
+
+```
+
+```{r Corr, echo=FALSE, fig.cap="RoF Test-Retest Reliability"}
+clinical %>% 
+#  filter(!userId %in% tooFew[[1]]) %>% 
+  pivot_wider(id_cols = lessonTitle, 
+              names_from = userId, 
+              values_from = MeanAlpha, 
+              names_prefix="sub") %>% 
+  ungroup() %>% 
+  select(lessonTitle) %>% 
+  as.vector() %>% 
+  c() -> L
+
+L <- L[[1]]
+
+D <- as.data.frame(C)
+names(D) <- L
+D$Lesson <- L
+
+D <- as_tibble(D)
+
+
+correlations <- D %>%
+  pivot_longer(cols=-Lesson, names_to = "With", values_to = "r")
+
+correlations$Lesson<- factor(correlations$Lesson, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales','Maps', 'US Towns 1'))
+correlations$With<- factor(correlations$With, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales','Maps', 'US Towns 1'))
+
+ggplot(correlations, aes(x=Lesson, y=With, fill=r)) +
+  geom_tile(col="white", size=1) +
+  scale_fill_viridis(option="inferno", limits=c(0, 1)) +
+#  scale_fill_continuous(limits=c(0, 1)) +
+  coord_equal() +
+  ggtitle("RoF Correlations Across Lessons") +
+  geom_text(aes(label=sprintf("%0.2f",
+                              round(r, digits = 3))), 
+            size=3) +
+  theme(axis.text.x=element_text(angle=45, hjust = 1)) +
+  theme_pander()
+```
+
+This figure visualizes the test-retest reliability of the RoF using correlations across materials  (fig \@ref(fig:Corr)). The mean correlation is `r round(mean(C_noself, na.rm=T), 3)`. 

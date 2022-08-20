@@ -59,12 +59,13 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-03.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-05.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
 data %>% 
   filter(userId %in% groups$userId) -> data
+
 
 ```
 
@@ -78,6 +79,48 @@ data <- data %>%
 
 ```
 
+```{r}
+# Filter the sessions
+sessionData <- data %>% 
+  group_by(userId, sessionId, lessonId, lessonTitle) %>% 
+  summarize(duration = (max(presentationStartTime) - min(presentationStartTime))/60000,
+            start = min(presentationStartTime),
+            legit = if_else(duration > 6, T, F)) 
+
+sessionData <- sessionData %>% 
+  group_by(userId, lessonId, lessonTitle, factAnswer, reactionTime) %>% 
+  arrange(start, by_group=T) %>%
+  mutate(sessionRank = seq(1, length(start)))
+
+sessionDataFiltered <- sessionData %>%
+  filter(legit == T) %>%
+  group_by(userId, lessonId, lessonTitle, factAnswer, reactionTime) %>%
+  mutate(minRank = min(sessionRank))
+
+sessionData <- sessionData %>%
+  inner_join(sessionDataFiltered) %>%
+  mutate(usable = if_else(minRank == sessionRank, T, F))
+
+```
+
+```{r}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```{r, echo=FALSE, results= 'hide'}
 # Filter by task  
 Pasta=filter(data,lessonTitle=='Pasta')
@@ -87,6 +130,13 @@ Capitals=filter(data,lessonTitle=='European Capitals 1')
 Birds=filter(data,lessonTitle=='Birds') 
 News=filter(data,lessonTitle=='Newspapers') 
 Flags=filter(data,lessonTitle=='Asian Flags') 
+Folktales=filter(data,lessonTitle=='Folktales')
+
+
+
+
+
+
 ```
 
 
@@ -453,3 +503,209 @@ average_ROF_participants(News, userId = "userId")
 average_ROF_participants(Flags, userId = "userId")
 
 ```
+
+```{r}
+
+# generate more illustrative dataset: you have this already
+set.seed(1)
+x <- 1:1000
+y <- as.POSIXct("06/01/2013",format="%m/%d/%Y")+sample(0:(210*24*60)*60,1000)
+y <- strftime(y,format="%m/%d/%Y %H:%M")
+data <- data.frame(ID=x,Starttime=y)
+
+# you start here...
+library(lubridate)     # for wday(...)
+library(ggplot2)
+library(RColorBrewer)  # for brewer.pal(...)
+
+data$date <- as.POSIXct(data$Starttime, format="%m/%d/%Y %H:%M")
+data$dow  <- wday(data$date)
+data$cdow <- wday(data$date,label=T)
+data$tod  <- as.numeric(data$date - as.POSIXct(strftime(data$date,format="%Y-%m-%d")))/60
+data$bins <- cut(data$tod,breaks=1:24,labels=F)
+counts    <- aggregate(ID~bins+dow,data,length)
+colnames(counts)[ncol(counts)] <- "Events"
+
+ggplot(counts, aes(x=bins,y=8-dow))+
+  geom_tile(aes(fill=Events))+
+  scale_fill_gradientn(colours=brewer.pal(9,"YlOrRd"),
+                       breaks=seq(0,max(counts$Events),by=2))+
+  scale_y_continuous(breaks=7:1,labels=c("Sun","Mon","Tues","Wed","Thurs","Fri","Sat"))+
+  labs(x="Time of Day (hours)", y="Day of Week")+
+  coord_fixed()
+```
+
+```{r}
+
+# generate more illustrative dataset: you have this already
+set.seed(1)
+x <- 1:1000
+y <- as.POSIXct("06/01/2013",format="%m/%d/%Y")+sample(0:(210*24*60)*60,1000)
+y <- strftime(y,format="%m/%d/%Y %H:%M")
+data <- data.frame(ID=x,Starttime=y)
+
+# Time of day task completed
+times <- as.POSIXct(data$presentationStartTime/1000, origin="1970-01-01")
+
+
+times <- as.POSIXct(sessionData$start/1000, origin="1970-01-01")
+sessionData$times <- times
+
+times <- as.POSIXct(data$start/1000, origin="1970-01-01")
+data$times <- times
+data$end <- (data$start+data$duration) 
+```
+```{r}
+# you start here...
+library(lubridate)     # for wday(...)
+library(ggplot2)
+library(RColorBrewer)  # for brewer.pal(...)
+
+data$date <- as.POSIXct(data$Starttime, format="%m/%d/%Y %H:%M")
+data$dow  <- wday(data$date)
+data$cdow <- wday(data$date,label=T)
+data$tod  <- as.numeric(data$date - as.POSIXct(strftime(data$date,format="%Y-%m-%d")))/60
+data$bins <- cut(data$tod,breaks=1:24,labels=F)
+counts    <- aggregate(ID~bins+dow,data,length)
+colnames(counts)[ncol(counts)] <- "Events"
+
+ggplot(counts, aes(x=bins,y=8-dow))+
+  geom_tile(aes(fill=Events))+
+  scale_fill_gradientn(colours=brewer.pal(9,"YlOrRd"),
+                       breaks=seq(0,max(counts$Events),by=2))+
+  scale_y_continuous(breaks=7:1,labels=c("Sun","Mon","Tues","Wed","Thurs","Fri","Sat"))+
+  labs(x="Time of Day (hours)", y="Day of Week")+
+  coord_fixed()
+```
+```{r}
+philly_calendar <- ggplot(clinical, aes(x = day, y = week)) + 
+  geom_tile(aes(fill = userId), colour = "white") +
+  facet_wrap(~text_month, scales = "free") + 
+  scale_y_reverse() + 
+  theme_minimal() + 
+  scale_fill_viridis_c(labels = dollar) + 
+  scale_x_discrete(position = "top") + 
+  ylab("") + xlab("") + labs(fill = "Fines Issued") + 
+  ggtitle("Philadelphia Parking Violations (2017)") +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(),
+        strip.text.x = element_text(
+          size = 12, color = "black", face = "bold"), 
+        plot.title = element_text(size = 14, hjust = 0.5))
+
+philly_calendar
+```
+
+
+```{r}
+#tasks <- read.csv("tasks.csv", header = T)
+
+times <- as.POSIXct(clinical$start/1000, origin="1970-01-01")
+
+
+clinical$times <- times
+clinical$end <- (clinical$start+clinical$duration) 
+
+
+# day of week
+clinical$day <- weekdays(strptime(clinical$times, "%Y-%m-%d"))
+week      <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+clinical$day <- factor(clinical$day, levels = week)
+clinical$tod <- strftime(times, format="%H:%M:%S")
+clinical$end <- (clinical$tod + 00:08:00"")
+clinical$duration1 <- strftime(clinical$duration)
+
+  strftime(clinical$duration, format="%H:%M:%S")
+
+hour(clinical$duration)*60 + minute(clinical$duration)
+
+Res <- as.POSIXlt(paste(Sys.Date(), clinical$duration))
+Res$hour*60 + Res$min
+
+#clinical$end <- as.POSIXct(clinical$tod, format="%H:%M:%S")
+
+
+# convert time to decimal hours
+clinical$start.ct   <- as.POSIXct(paste(clinical$times, clinical$start, sep = " "))
+clinical$end.ct     <- as.POSIXct(paste(clinical$times, clinical$end, sep = " "))
+clinical$start.hour <- as.POSIXlt(clinical$start.ct)$hour + as.POSIXlt(clinical$start.ct)$min/60 + as.POSIXlt(clinical$start.ct)$sec/3600
+clinical$end.hour   <- as.POSIXlt(clinical$end.ct)$hour + as.POSIXlt(clinical$end.ct)$min/60 + as.POSIXlt(clinical$end.ct)$sec/3600
+
+# offset clinical if > 1 per day
+clinical$ymin <- c(rep(0, nrow(clinical)))
+t <- table(clinical$day)
+for(day in rownames(t)) {
+  if(t[[day]] > 1) {
+    ss <- clinical[clinical$day == day,]
+    y  <- 0
+    for(i in as.numeric(rownames(ss))) {
+      clinical[i,]$ymin <- y
+      y <- y + 1.2
+    }
+  }
+}
+
+```
+
+```{r}
+#week1 <- clinical 
+
+#tasks <- read.csv("tasks.csv", header = T)
+
+
+
+clinical$todduration<- c("00:08:00")
+
+times <- as.POSIXct(clinical$start/1000, origin="1970-01-01")
+clinical$times <- times
+clinical$end <- (clinical$todduration) 
+
+
+# day of week
+clinical$day <- weekdays(strptime(clinical$times, "%Y-%m-%d"))
+week      <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+clinical$day <- factor(clinical$day, levels = week)
+clinical$tod <- strftime(times, format="%H:%M:%S")
+clinical$tod <- as.POSIXct(clinical$tod, format="%H:%M:%S")
+clinical$tod <- strftime(times, format="%H:%M:%S")
+#clinical$tod<- as.numeric(as.character(clinical$tod))
+
+# convert time to decimal hours
+clinical$start.ct   <- as.POSIXct(paste(clinical$times, clinical$start, sep = " "))
+clinical$end.ct     <- as.POSIXct(paste(clinical$times, clinical$end, sep = " "))
+clinical$start.hour <- as.POSIXlt(clinical$start.ct)$hour + as.POSIXlt(clinical$start.ct)$min/60 + as.POSIXlt(clinical$start.ct)$sec/3600
+clinical$end.hour   <- as.POSIXlt(clinical$end.ct)$hour + as.POSIXlt(clinical$end.ct)$min/60 + as.POSIXlt(clinical$end.ct)$sec/3600
+
+# offset clinical if > 1 per day
+clinical$ymin <- c(rep(0, nrow(clinical)))
+t <- table(clinical$day)
+for(day in rownames(t)) {
+  if(t[[day]] > 1) {
+    ss <- clinical[clinical$day == day,]
+    y  <- 0
+    for(i in as.numeric(rownames(ss))) {
+      clinical[i,]$ymin <- y
+      y <- y + 1.2
+    }
+  }
+}
+
+
+
+calplot <- ggplot(clinical, aes(xmin = start.hour, xmax = end.hour, 
+                     ymin = ymin, ymax = ymin + 1, fill = factor(userId))) + 
+  geom_rect() +
+  facet_grid(day~.) + 
+  theme(axis.text.y = element_blank(),
+        axis.ticks = element_blank()) +
+  xlim(0,23) +
+  xlab("time of day")
+calplot
+```
+
+```{r}
+clinical$todduration <- clinical$duration %>% as.character() %>% str_split(pattern='[/.]')
+
+```
+
