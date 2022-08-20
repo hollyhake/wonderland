@@ -55,7 +55,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-18.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-20.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -128,19 +128,19 @@ News=filter(cleandata,lessonTitle=='Newspapers')
 Flags=filter(cleandata,lessonTitle=='Asian Flags') 
 Folktales=filter(cleandata,lessonTitle=='Folktales') 
 Maps=filter(cleandata,lessonTitle=='Maps') 
-USTowns=filter(cleandata,lessonTitle=='US Towns 1') 
+Towns=filter(cleandata,lessonTitle=='US Towns 1') 
 
 ```
 
-## Lesson Fact Reaction Times
+## Lesson Fact Response Times
 
 ```{r, echo=FALSE}
 
 ggplot(data, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time") +
-  ggtitle("Reaction Time for Each Fact (unfiltered)") +
+  ylab("Response Time") +
+  ggtitle("Response Time for Each Fact (unfiltered)") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
@@ -149,8 +149,8 @@ ggplot(data, aes(x=factAnswer, y=reactionTime))+
 ggplot(cleandata, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time") +
-  ggtitle("Reaction Time for Each Fact") +
+  ylab("Response Time") +
+  ggtitle("Response Time for Each Fact") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
@@ -158,8 +158,8 @@ ggplot(cleandata, aes(x=factAnswer, y=reactionTime))+
 ggplot(Pasta, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Pasta: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Pasta: Response Time for Each Fact") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
@@ -168,8 +168,8 @@ ggplot(Pasta, aes(x=factAnswer, y=reactionTime))+
 ggplot(Swahili1, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Swahili: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Swahili: Response Time for Each Fact") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
@@ -178,8 +178,8 @@ ggplot(Swahili1, aes(x=factAnswer, y=reactionTime))+
 ggplot(Flowers, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Flowers: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Flowers: Response Time for Each Fact") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
@@ -188,8 +188,8 @@ ggplot(Flowers, aes(x=factAnswer, y=reactionTime))+
 ggplot(Capitals, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Capitals: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Capitals: Response Time for Each Fact") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
@@ -198,8 +198,8 @@ ggplot(Capitals, aes(x=factAnswer, y=reactionTime))+
 ggplot(Birds, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Birds: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Birds: Response Time for Each Fact") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
@@ -208,8 +208,8 @@ ggplot(Birds, aes(x=factAnswer, y=reactionTime))+
 ggplot(News, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("News: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("News: Response Time for Each Fact") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
@@ -218,8 +218,8 @@ ggplot(News, aes(x=factAnswer, y=reactionTime))+
 ggplot(Flags, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Flags: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Flags: Response Time for Each Fact") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
@@ -228,8 +228,8 @@ ggplot(Flags, aes(x=factAnswer, y=reactionTime))+
 ggplot(Folktales, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Folktales: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Folktales: Response Time for Each Fact") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
@@ -238,33 +238,33 @@ ggplot(Folktales, aes(x=factAnswer, y=reactionTime))+
 ggplot(Maps, aes(x=factAnswer, y=reactionTime))+
   geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Maps: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Maps: Response Time for Each Fact") +
   theme_pander() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
 
-#ggplot(USTowns1, aes(x=factAnswer, y=reactionTime))+
- # geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
-  #     xlab("Fact") +
- # ylab("Reaction Time (ms)") +
- # ggtitle("US Towns 1: Reaction Time for Each Fact") +
- # theme_pander() +
- # theme(legend.position = "none",
-     #   axis.text.x = element_text (angle=90))
+ggplot(Towns, aes(x=factAnswer, y=reactionTime))+
+  geom_point(size=1, position=position_jitter(0.1), aes(color= "purple3")) +
+  xlab("Fact") +
+  ylab("sec") +
+  ggtitle("US Towns 1: Response Time for Each Fact") +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.text.x = element_text (angle=90))
 
 ```
 
-### Reaction Time for each fact (interactive)
+### Response Time for each fact (interactive)
 
 ```{r, echo=FALSE}
 
 graph=ggplot(Pasta, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Pasta: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Pasta: Response Time for Each Fact") +
   labs(col="Participant") +
   theme_pander() +
   theme(legend.position = "right",
@@ -276,8 +276,8 @@ ggplotly(graph, tooltip=c("y", "text")) %>%
 graph=ggplot(Swahili1, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Swahili: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Swahili: Response Time for Each Fact") +
   labs(col="Participant") +
   theme_pander() +
   theme(legend.position = "right",
@@ -289,8 +289,8 @@ ggplotly(graph, tooltip=c("y", "text")) %>%
 graph=ggplot(Flowers, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Flowers: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Flowers: Response Time for Each Fact") +
   labs(col="Participant") +
   theme_pander() +
   theme(legend.position = "right",
@@ -302,8 +302,8 @@ ggplotly(graph, tooltip=c("y", "text")) %>%
 graph=ggplot(Capitals, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Capitals: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Capitals: Response Time for Each Fact") +
   labs(col="Participant") +
   theme_pander() +
   theme(legend.position = "right",
@@ -315,8 +315,8 @@ ggplotly(graph, tooltip=c("y", "text")) %>%
 graph=ggplot(Birds, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Birds: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Birds: Response Time for Each Fact") +
   labs(col="Participant") +
   theme_pander() +
   theme(legend.position = "right",
@@ -328,8 +328,8 @@ ggplotly(graph, tooltip=c("y", "text")) %>%
 graph=ggplot(News, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("News: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("News: Response Time for Each Fact") +
   labs(col="Participant") +
   theme_pander() +
   theme(legend.position = "right",
@@ -341,8 +341,8 @@ ggplotly(graph, tooltip=c("y", "text")) %>%
 graph=ggplot(Flags, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Flags: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Flags: Response Time for Each Fact") +
   labs(col="Participant") +
   theme_pander() +
   theme(legend.position = "right",
@@ -354,8 +354,8 @@ ggplotly(graph, tooltip=c("y", "text")) %>%
 graph=ggplot(Folktales, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Folktales: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Folktales: Response Time for Each Fact") +
   labs(col="Participant") +
   theme_pander() +
   theme(legend.position = "right",
@@ -368,8 +368,8 @@ ggplotly(graph, tooltip=c("y", "text")) %>%
 graph=ggplot(Maps, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
   geom_point(size=1, position=position_jitter(0.1)) +
        xlab("Fact") +
-  ylab("Reaction Time (ms)") +
-  ggtitle("Maps: Reaction Time for Each Fact") +
+  ylab("sec") +
+  ggtitle("Maps: Response Time for Each Fact") +
   labs(col="Participant") +
   theme_pander() +
   theme(legend.position = "right",
@@ -379,18 +379,18 @@ ggplotly(graph, tooltip=c("y", "text")) %>%
   config(displayModeBar=FALSE)
 
 
-#graph=ggplot(USTowns1, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
- # geom_point(size=1, position=position_jitter(0.1)) +
-  #     xlab("Fact") +
-  #ylab("Reaction Time (ms)") +
-  #ggtitle("US Towns 1: Reaction Time for Each Fact") +
-  #labs(col="Participant") +
-  #theme_pander() +
-  #theme(legend.position = "right",
-   #     axis.text.x = element_text (angle=90),
-    #    panel.grid.major = element_blank())
-#ggplotly(graph, tooltip=c("y", "text")) %>% 
- # config(displayModeBar=FALSE)
+graph=ggplot(Towns, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("sec") +
+  ggtitle("US Towns 1: Response Time for Each Fact") +
+  labs(col="Participant") +
+  theme_pander() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90),
+        panel.grid.major = element_blank())
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
 
 
 

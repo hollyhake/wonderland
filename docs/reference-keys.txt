@@ -60,3 +60,5 @@ fig:RoF1
 fig:mmRoF
 accuracy
 response-time
+lesson-fact-response-times
+response-time-for-each-fact-interactive
