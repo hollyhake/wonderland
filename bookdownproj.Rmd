@@ -1,3 +1,43 @@
+--- 
+title: "Tracking memory decline"
+author: "Holly Hake"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+---
+
+# Introduction
+
+Placeholder
+
+
+
+<!--chapter:end:index.Rmd-->
+
+# Methods
+
+## Rate of Forgetting
+
+'Rate of forgetting' is the probability of retrieving a particular memory over time and is rooted in a Bayesian model of cognition.
+
+## Participants 
+
+A total of (#) English-speaking participants aged between (#) and (#) years old were recruited on a rolling basis from the Alzheimer's Disease Research Center (ADRC). Participants were enrolled for one year to get a comprehensive view of how their memory changes over time. All participants provided informed consent and were compensated with $100 for their participation in the online memory game portion of the study. All of the recruitment and testing procedures were approved by the University of Washington’s Institutional Review Board.
+
+
+## Memory Task
+
+Rate of forgetting was estimated using SlimStampen, an adaptive fact learning system (AFLS) described in Sense et al. (2016).
+
+
+## Data Processing
+
+The repetition, activation, and alpha values for each fact were calculated using two functions from the SlimStampeRData package. The average alpha values for each fact were identified by using the terminal alpha value of each fact (the estimate of alpha at the very last repetition of that fact). The data was then filtered to only contain the first full session (>6 min). This was needed to eliminate any superfluous sessions (some participant's like to complete the task more than once).  
+
+
+
+
+<!--chapter:end:methods.Rmd-->
+
 # Results
 
 ```{r setup, include=FALSE}
@@ -821,3 +861,23 @@ ggplot(correlations, aes(x=Lesson, y=With, fill=r)) +
 ```
 
 This figure visualizes the test-retest reliability of the RoF using correlations across materials  (fig \@ref(fig:Corr)). The mean correlation is `r round(mean(C_noself, na.rm=T), 3)`. 
+
+<!--chapter:end:results.Rmd-->
+
+
+# Supplement
+
+Placeholder
+
+
+## Lesson Fact Response Times
+### Response Time for each fact (interactive)
+## Lesson Facts RoF
+### Average Rate of Forgetting for Each Lesson's Facts
+## Lesson Participant RoF
+### Average Rate of Forgetting for Every Participant in Each Lesson
+### Average Rate of Forgetting for Every Participant in Each Lesson (Interactive)
+#### By Clinical Status
+
+<!--chapter:end:supplement.Rmd-->
+
