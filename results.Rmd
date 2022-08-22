@@ -55,7 +55,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-20.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-22.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -141,8 +141,8 @@ clinical$responseTime <- (clinical$responseTime/1000)
 clinical <- clinical[!(clinical$lessonTitle=="01 Practice"), ]
 
 # **Testing taking out outlier participant lessons
-clinical <- clinical[-c(67,70,72,73,87), ] 
-clinical <- clinical[!(clinical$userId=="69415"), ]
+#clinical <- clinical[-c(67,70,72,73,87), ] 
+#clinical <- clinical[!(clinical$userId=="69415"), ]
 
 
 # Order the lessons by week
