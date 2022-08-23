@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Results
 
 ```{r setup, include=FALSE}
@@ -55,7 +60,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-22.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-23.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -200,13 +205,16 @@ clinical$user_order<- factor(clinical$userId, level = c('69410','69411','69412',
   ylab("participant") +
   ggtitle("Weekly Game Completion") +
   labs(fill="Participant", col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(axis.title.x=element_blank(),
         legend.position = "none")
 
 #ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
  # layout(legend = list(orientation = "h")) %>% 
  # config(displayModeBar=FALSE)
+  
+  
+  
 
 ```
 
@@ -225,7 +233,7 @@ PAcc1=ggplot(clinical, aes(x=level_order, y=correct, col=lessonTitle, fill=lesso
   scale_x_discrete(labels=xlabels) +
   ylab("accuracy") +
   ggtitle("Accuracy Across Lessons") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.title.x=element_blank())
 
@@ -244,7 +252,7 @@ PAcc2=ggplot(clinical, aes(y = correct, x = level_order, col = clinicalStatus, f
   ggtitle(" ") +
  # ggtitle("Accuracy Across Lessons By Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "bottom",
         axis.title.x = element_blank()) 
 
@@ -268,7 +276,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=correct, text=paste0(userId
   ylab("mean accuracy") +
   ggtitle("Accuracy by Participant") +
   labs(fill="Participant", col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(axis.title.x=element_blank(),
         panel.grid.major = element_blank())
 
@@ -295,7 +303,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=correct, col=clinicalStatus
   ylab("mean accuracy") +
   ggtitle("Accuracy by Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
+  theme_hc() +
   theme(axis.title.x=element_blank(),
         panel.grid.major = element_blank())
 
@@ -320,7 +328,7 @@ PRT1=ggplot(clinical, aes(x=level_order, y=responseTime, col=lessonTitle, fill=l
   scale_x_discrete(labels=xlabels) +
   ylab("sec") +
   ggtitle("Response Time Across Lessons") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.title.x=element_blank())
 
@@ -339,7 +347,7 @@ PRT2=ggplot(clinical, aes(y=responseTime, x=level_order, col=clinicalStatus, fil
   ggtitle(" ") +
  # ggtitle("Response Time Across Lessons by Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "bottom",
         axis.title.x = element_blank()) 
 
@@ -363,7 +371,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=responseTime, text=paste0(u
   ylab("sec") +
   ggtitle("Response Time by Participant") +
   labs(fill="Participant", col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(axis.title.x=element_blank(),
         panel.grid.major = element_blank())
 
@@ -387,7 +395,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=responseTime, col=clinicalS
   ylab("sec") +
   ggtitle("Response Time by Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
+  theme_hc() +
   theme(axis.title.x=element_blank(),
         panel.grid.major = element_blank())
 
@@ -413,7 +421,7 @@ ggplot(clinical, aes(x=level_order, y=MeanAlpha, col=lessonTitle, fill=lessonTit
   scale_x_discrete(labels=xlabels) +
   ylab("mean alpha") +
   ggtitle("Rate of Forgetting Across Lessons") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position="none")
 
 
@@ -429,7 +437,7 @@ PRoF1=ggplot(clinical, aes(x=level_order, y=MeanAlpha, col=lessonTitle, fill=les
   scale_x_discrete(labels=xlabels) +
   ylab("alpha") +
   ggtitle("Rate of Forgetting Across Lessons") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.title.x=element_blank())
 
@@ -448,7 +456,7 @@ PRoF2=ggplot(clinical, aes(y=MeanAlpha, x=level_order, col=clinicalStatus, fill=
   ggtitle(" ") +
  # ggtitle("Rate of Forgetting Across Lessons by Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "bottom",
         axis.title.x = element_blank()) 
 
@@ -471,7 +479,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=MeanAlpha, text=paste0(user
   ylab("mean alpha") +
   ggtitle("Rate of Forgetting by Participant") +
   labs(fill="Participant", col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(axis.title.x=element_blank(),
         panel.grid.major = element_blank())
 
@@ -495,7 +503,7 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=MeanAlpha,col=clinicalStatu
   ylab("mean alpha") +
   ggtitle("Rate of Forgetting by Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
+  theme_hc() +
   theme(axis.title.x=element_blank(),
         panel.grid.major = element_blank())
 
@@ -521,7 +529,7 @@ PRoFmean=ggplot(clinical, aes(y=MeanAlpha, x =level_order, col=clinicalStatus, f
   ylab("mean alpha") +
   ggtitle("Rate of Forgetting By Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.title.x = element_blank()) 
 
@@ -538,7 +546,7 @@ PRoFmed=ggplot(clinical, aes(y=MedianAlpha, x =level_order, col=clinicalStatus, 
   ylab("median alpha") +
   #ggtitle("Rate of Forgetting By Clinical Status") +
   labs(col="Clinical Status", fill="Clinical Status") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "bottom",
         axis.title.x = element_blank()) 
 
@@ -589,7 +597,7 @@ PRoFD1 <- ggplot(clinical, aes(x=MeanAlpha, fill=clinicalStatus)) +
   ylab("Number of Observations") +
   xlim(c(0.2, 0.6)) +
   labs(fill="Clinical Status") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "bottom") 
 
 
@@ -601,7 +609,7 @@ PRoFD2 <- ggplot(clinical_avg, aes(x=RoF, fill=clinicalStatus)) +
   ylab("Number of Observations") +
   xlim(c(0.2, 0.6)) +
   labs(fill="Clinical Status") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "bottom") 
 
 
@@ -681,7 +689,7 @@ ggplot(arrange(curve, TPR), aes(x=TNR, y=TPR)) +
   coord_equal() +
   ggtitle("ROC Curve for Different Thresholds (Single)") +
   geom_abline(slope=1, intercept = 1, col="grey", linetype = "dashed") +
-  theme_pander()
+  theme_hc()
 ```
 
 This figure visualizes the ROC curve to see the classification accuracy at each RoF threshold (fig \@ref(fig:Class)). In this case, having a RoF value of 0.# as the diagnostic threshold- that is people with an RoF of 0.# and up are considered mildly cognitively impaired and people with an RoF less than are healthy controls- gives us a diagnostic classification accuracy of #%. All together though, the global AUC for single session is `r AUC`.  
@@ -751,7 +759,7 @@ ggplot(arrange(curve, TPR), aes(x=TNR, y=TPR)) +
   coord_equal() +
   ggtitle("ROC Curve for Different Thresholds (AVG)") +
   geom_abline(slope=1, intercept = 1, col="grey", linetype = "dashed") +
-  theme_pander()
+  theme_hc()
 ```
 
 This figure visualizes the ROC curve to see the classification accuracy at each RoF threshold (fig \@ref(fig:Classavg)). The global AUC for averaged sessions is `r AVGAUC`.
@@ -817,7 +825,7 @@ ggplot(correlations, aes(x=Lesson, y=With, fill=r)) +
                               round(r, digits = 3))), 
             size=3) +
   theme(axis.text.x=element_text(angle=45, hjust = 1)) +
-  theme_pander()
+  theme_hc()
 ```
 
 This figure visualizes the test-retest reliability of the RoF using correlations across materials  (fig \@ref(fig:Corr)). The mean correlation is `r round(mean(C_noself, na.rm=T), 3)`. 

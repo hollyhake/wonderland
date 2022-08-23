@@ -62,3 +62,4 @@ accuracy
 response-time
 lesson-fact-response-times
 response-time-for-each-fact-interactive
+fig:Completion
