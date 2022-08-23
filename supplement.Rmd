@@ -55,7 +55,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-20.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-23.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -141,7 +141,7 @@ ggplot(data, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("Response Time") +
   ggtitle("Response Time for Each Fact (unfiltered)") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -151,7 +151,7 @@ ggplot(cleandata, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("Response Time") +
   ggtitle("Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -160,7 +160,7 @@ ggplot(Pasta, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("sec") +
   ggtitle("Pasta: Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -170,7 +170,7 @@ ggplot(Swahili1, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("sec") +
   ggtitle("Swahili: Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -180,7 +180,7 @@ ggplot(Flowers, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("sec") +
   ggtitle("Flowers: Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -190,7 +190,7 @@ ggplot(Capitals, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("sec") +
   ggtitle("Capitals: Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -200,7 +200,7 @@ ggplot(Birds, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("sec") +
   ggtitle("Birds: Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -210,7 +210,7 @@ ggplot(News, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("sec") +
   ggtitle("News: Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -220,7 +220,7 @@ ggplot(Flags, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("sec") +
   ggtitle("Flags: Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -230,7 +230,7 @@ ggplot(Folktales, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("sec") +
   ggtitle("Folktales: Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -240,7 +240,7 @@ ggplot(Maps, aes(x=factAnswer, y=reactionTime))+
        xlab("Fact") +
   ylab("sec") +
   ggtitle("Maps: Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -250,7 +250,7 @@ ggplot(Towns, aes(x=factAnswer, y=reactionTime))+
   xlab("Fact") +
   ylab("sec") +
   ggtitle("US Towns 1: Response Time for Each Fact") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "none",
         axis.text.x = element_text (angle=90))
 
@@ -266,7 +266,7 @@ graph=ggplot(Pasta, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(us
   ylab("sec") +
   ggtitle("Pasta: Response Time for Each Fact") +
   labs(col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "right",
         axis.text.x = element_text (angle=90))
 ggplotly(graph, tooltip=c("y", "text")) %>% 
@@ -279,7 +279,7 @@ graph=ggplot(Swahili1, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0
   ylab("sec") +
   ggtitle("Swahili: Response Time for Each Fact") +
   labs(col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "right",
         axis.text.x = element_text (angle=90))
 ggplotly(graph, tooltip=c("y", "text")) %>% 
@@ -292,7 +292,7 @@ graph=ggplot(Flowers, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(
   ylab("sec") +
   ggtitle("Flowers: Response Time for Each Fact") +
   labs(col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "right",
         axis.text.x = element_text (angle=90))
 ggplotly(graph, tooltip=c("y", "text")) %>% 
@@ -305,7 +305,7 @@ graph=ggplot(Capitals, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0
   ylab("sec") +
   ggtitle("Capitals: Response Time for Each Fact") +
   labs(col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "right",
         axis.text.x = element_text (angle=90))
 ggplotly(graph, tooltip=c("y", "text")) %>% 
@@ -318,7 +318,7 @@ graph=ggplot(Birds, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(us
   ylab("sec") +
   ggtitle("Birds: Response Time for Each Fact") +
   labs(col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "right",
         axis.text.x = element_text (angle=90))
 ggplotly(graph, tooltip=c("y", "text")) %>% 
@@ -331,7 +331,7 @@ graph=ggplot(News, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(use
   ylab("sec") +
   ggtitle("News: Response Time for Each Fact") +
   labs(col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "right",
         axis.text.x = element_text (angle=90))
 ggplotly(graph, tooltip=c("y", "text")) %>% 
@@ -344,7 +344,7 @@ graph=ggplot(Flags, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(us
   ylab("sec") +
   ggtitle("Flags: Response Time for Each Fact") +
   labs(col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "right",
         axis.text.x = element_text (angle=90))
 ggplotly(graph, tooltip=c("y", "text")) %>% 
@@ -357,7 +357,7 @@ graph=ggplot(Folktales, aes(x=factAnswer, y=reactionTime, col=userId, text=paste
   ylab("sec") +
   ggtitle("Folktales: Response Time for Each Fact") +
   labs(col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "right",
         axis.text.x = element_text (angle=90),
         panel.grid.major = element_blank())
@@ -371,7 +371,7 @@ graph=ggplot(Maps, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(use
   ylab("sec") +
   ggtitle("Maps: Response Time for Each Fact") +
   labs(col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "right",
         axis.text.x = element_text (angle=90),
         panel.grid.major = element_blank())
@@ -385,7 +385,7 @@ graph=ggplot(Towns, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(us
   ylab("sec") +
   ggtitle("US Towns 1: Response Time for Each Fact") +
   labs(col="Participant") +
-  theme_pander() +
+  theme_hc() +
   theme(legend.position = "right",
         axis.text.x = element_text (angle=90),
         panel.grid.major = element_blank())
@@ -509,7 +509,7 @@ firstsession <- function(df) {
    # ggplot2::guides(fill = "none") +
     #ggplot2::coord_cartesian(xlim = x, ylim = y) +
   #  ggplot2::labs(x = "Fact Repetitions", y = "Alpha") +
-   # theme_pander() +
+   # theme_hc() +
     #ggplot2::theme(legend.position="right") +
     #ggplot2::guides(colour=ggplot2::guide_legend(nrow=18, byrow=FALSE)) +
     #ggplot2::ggtitle(plotTitle)
@@ -540,7 +540,7 @@ Pasta_AVG_RoF_Facts <- inner_join(Pasta, Pasta_AVG_RoF_Facts)
   #  guides(fill = "none") +
   #  coord_cartesian(xlim = x, ylim = y) +
   #  labs(x = "Fact Repetitions", y = "Alpha") +
-  #  theme_pander() +
+  #  theme_hc() +
  #   theme(legend.position="right") +
   #  guides(colour=guide_legend(nrow=18, byrow=FALSE)) +
   #  ggtitle(plotTitle)
@@ -646,7 +646,7 @@ firstsession <- function(df) {
     ggplot2::guides(fill = "none") +
     ggplot2::coord_cartesian(xlim = x, ylim = y) +
     ggplot2::labs(x = "Fact Repetitions", y = "Alpha") +
-    theme_pander() +
+    theme_hc() +
     ggplot2::theme(legend.position="right") +
     ggplot2::guides(colour=ggplot2::guide_legend(nrow=18, byrow=FALSE)) +
     ggplot2::ggtitle(plotTitle)
@@ -758,7 +758,7 @@ firstsession <- function(df) {
     ggplot2::coord_cartesian(xlim = x, ylim = y) +
     ggplot2::labs(x = "Fact Repetitions", y = "Alpha") +
     labs(col="Clinical Status", fill="Clinical Status") +
-    theme_pander() +
+    theme_hc() +
     ggplot2::theme(legend.position="right") +
     ggplot2::guides(colour=ggplot2::guide_legend(nrow=18, byrow=FALSE)) +
     ggplot2::ggtitle(plotTitle)

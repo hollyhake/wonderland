@@ -183,11 +183,9 @@ clinical %>%
     ), 50, 50)) %>% # Add images to the table 
   kable_paper(full_width = T) 
 
-
-
-
-
 ```
+
+
 ```{r Completion, echo=FALSE, fig.cap="Weekly lessons each participant completed"}
 
 # Order the users by time they joined the study
@@ -212,8 +210,6 @@ clinical$user_order<- factor(clinical$userId, level = c('69410','69411','69412',
 #ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
  # layout(legend = list(orientation = "h")) %>% 
  # config(displayModeBar=FALSE)
-  
-  
   
 
 ```
@@ -377,6 +373,27 @@ graph.clinical=ggplot(clinical, aes(x=level_order, y=responseTime, text=paste0(u
 
 ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
   layout(legend = list(orientation = "h")) %>% 
+  config(displayModeBar=FALSE)
+
+
+cleandata <- inner_join(sessionData, data) %>%
+  filter(usable == T)
+
+cleandata$userId <- as.character(cleandata$userId)
+
+# Change reactionTime from ms to s
+cleandata$reactionTime <- (cleandata$reactionTime/1000)
+
+
+graph=ggplot(cleandata, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=0.5, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("sec") +
+  ggtitle("Response Time for Each Fact") +
+  theme_hc() +
+  theme(#legend.position = "none",
+        axis.text.x = element_text (angle=90, size=3))
+ggplotly(graph, tooltip=c("y", "text")) %>% 
   config(displayModeBar=FALSE)
 
 ```
