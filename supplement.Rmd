@@ -55,7 +55,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-26.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-30.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -129,6 +129,7 @@ Flags=filter(cleandata,lessonTitle=='Asian Flags')
 Folktales=filter(cleandata,lessonTitle=='Folktales') 
 Maps=filter(cleandata,lessonTitle=='Maps') 
 Towns=filter(cleandata,lessonTitle=='US Towns 1') 
+Art=filter(cleandata,lessonTitle=='Art') 
 
 ```
 
@@ -404,7 +405,18 @@ graph=ggplot(Towns, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(us
 ggplotly(graph, tooltip=c("y", "text")) %>% 
   config(displayModeBar=FALSE)
 
-
+graph=ggplot(Art, aes(x=factAnswer, y=reactionTime, col=userId, text=paste0(userId)))+
+  geom_point(size=1, position=position_jitter(0.1)) +
+       xlab("Fact") +
+  ylab("sec") +
+  ggtitle("Art: Response Time for Each Fact") +
+  labs(col="Participant") +
+  theme_hc() +
+  theme(legend.position = "right",
+        axis.text.x = element_text (angle=90),
+        panel.grid.major = element_blank())
+ggplotly(graph, tooltip=c("y", "text")) %>% 
+  config(displayModeBar=FALSE)
 
 
 ```
@@ -421,6 +433,9 @@ Birds=filter(data,lessonTitle=='Birds')
 News=filter(data,lessonTitle=='Newspapers') 
 Flags=filter(data,lessonTitle=='Asian Flags') 
 Folktales=filter(data,lessonTitle=='Folktales') 
+Maps=filter(data,lessonTitle=='Maps') 
+Towns=filter(data,lessonTitle=='US Towns 1') 
+Art=filter(data,lessonTitle=='Art') 
 
 ```
 

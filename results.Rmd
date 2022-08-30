@@ -62,7 +62,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-26.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-08-30.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -144,7 +144,7 @@ clinical <- inner_join(data_avg, groups) %>%
   filter(usable == T)
 
 
-
+# Change 'userId' from numeric to character
 clinical$userId <- as.character(clinical$userId)
 clinical <- clinical %>%
   mutate(paired= factor(userId))
@@ -165,6 +165,8 @@ clinical$level_order<- factor(clinical$lessonTitle, level = c('Pasta','Swahili 1
 
 xlabels <- c("Pasta", "Swahili", "Flowers", "Capitals", "Birds","News", "Flags", "Folktales", "Maps", "Towns", "Art")
 
+# Order the users by time they joined the study
+clinical$user_order<- factor(clinical$userId, level = c('69410','69411','69412','69414','69415','69417','69418','69419','69427','70930','69421','69422','69423','69425','70925', '71203'))
 
 ```
 ## Data Tables
@@ -397,35 +399,6 @@ clinical %>%
     "C:/Users/17203/Documents/wonderland/images/art.png"
     ), 50, 50)) %>% # Add images to the table 
   kable_paper(full_width = T) 
-
-```
-
-
-```{r Completion, echo=FALSE, fig.cap="Weekly lessons each participant completed"}
-
-# Order the users by time they joined the study
-clinical$user_order<- factor(clinical$userId, level = c('69410','69411','69412','69414','69415','69417','69418','69419','69427','70930','69421','69422','69423','69425','70925'))
-
-
-#graph.clinical=
-  ggplot(clinical, aes(x=level_order, y=user_order, text=paste0(userId))) +
-  #geom_boxplot(size=0.1) +
- # geom_line(aes(group=userId, col=userId), size=0.1, position=position_dodge(0)) +
-   # geom_line(aes(group=userId), size=0.1, position=position_dodge(0)) +
-  geom_point(aes(group=paired), color ="green3", size=3, shape=15, stroke=0, position=position_dodge(0)) +
-  xlab("Lesson") +
-  scale_x_discrete(labels=xlabels) +
-  ylab("participant") +
-  ggtitle("Weekly Game Completion") +
-  labs(fill="Participant", col="Participant") +
-  theme_hc() +
-  theme(axis.title.x=element_blank(),
-        legend.position = "none")
-
-#ggplotly(graph.clinical, tooltip=c("y", "text")) %>% 
- # layout(legend = list(orientation = "h")) %>% 
- # config(displayModeBar=FALSE)
-  
 
 ```
 
@@ -1055,7 +1028,7 @@ ggplot(correlations, aes(x=Lesson, y=With, fill=r)) +
   coord_equal() +
   ggtitle("RoF Correlations Across Lessons") +
   geom_text(aes(label=sprintf("%0.2f",
-                              round(r, digits = 3))), 
+                              round(r, digits = 2))), 
             size=3) +
   theme(axis.text.x=element_text(angle=45, hjust = 1)) +
   theme_hc()
