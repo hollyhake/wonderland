@@ -62,7 +62,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-09-07.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-09-08.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -169,9 +169,9 @@ clinical <- clinical[!(clinical$lessonTitle=="01 Practice"), ]
 
 
 # Order the lessons by week
-clinical$level_order<- factor(clinical$lessonTitle, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales', 'Maps', 'US Towns 1', 'Art', 'Hindu Gods'))
+clinical$level_order<- factor(clinical$lessonTitle, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales', 'Maps', 'US Towns 1', 'Art', 'Hindu Gods','Cheese'))
 
-xlabels <- c("Pasta", "Swahili", "Flowers", "Capitals", "Birds","News", "Flags", "Folktales", "Maps", "Towns", "Art", "Hindi")
+xlabels <- c("Pasta", "Swahili", "Flowers", "Capitals", "Birds","News", "Flags", "Folktales", "Maps", "Towns", "Art", "Hindi","Cheese")
 
 # Order the users by time they joined the study
 clinical$user_order<- factor(clinical$userId, level = c('69410','69411','69412','69414','69415','69417','69418','69419','69427','70930','69421','69422','69423','69425','70925', '71203'))
@@ -206,7 +206,8 @@ clinical %>%
     "C:/Users/17203/Documents/wonderland/images/maps.png",
     "C:/Users/17203/Documents/wonderland/images/ustowns1.png", 
     "C:/Users/17203/Documents/wonderland/images/art.png",
-    "C:/Users/17203/Documents/wonderland/images/hindi.png"
+    "C:/Users/17203/Documents/wonderland/images/hindi.png",
+    "C:/Users/17203/Documents/wonderland/images/cheese.png"
     ), 50, 50)) %>% # Add images to the table 
   kable_paper(full_width = T) 
 
@@ -828,8 +829,8 @@ D <- as_tibble(D)
 correlations <- D %>%
   pivot_longer(cols=-Lesson, names_to = "With", values_to = "r")
 
-correlations$Lesson<- factor(correlations$Lesson, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales','Maps', 'US Towns 1', 'Art','Hindu Gods'))
-correlations$With<- factor(correlations$With, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales','Maps', 'US Towns 1', 'Art','Hindu Gods'))
+correlations$Lesson<- factor(correlations$Lesson, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales','Maps', 'US Towns 1', 'Art','Hindu Gods','Cheese'))
+correlations$With<- factor(correlations$With, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales','Maps', 'US Towns 1', 'Art','Hindu Gods','Cheese'))
 
 ggplot(correlations, aes(x=Lesson, y=With, fill=r)) +
   geom_tile(col="white", size=1) +
