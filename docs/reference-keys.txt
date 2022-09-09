@@ -65,3 +65,4 @@ response-time-for-each-fact-interactive
 fig:Completion
 tab:unnamed-chunk-6
 data-tables
+tab:fact

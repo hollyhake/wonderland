@@ -62,7 +62,7 @@ library(SlimStampeRData)
 ```{r, echo=FALSE, results= 'hide'}
 
 # Load data
-load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-09-08.RData")
+load("C:/Users/17203/Documents/GitHub/Blaarkop/data/SlimStampen_2022-09-09.RData")
 
 # Filter for just ADRC subjects & group by clinical status
 groups <- read_csv("C:/Users/17203/Documents/GitHub/Blaarkop/groups.csv", show_col_types = FALSE)
@@ -70,8 +70,9 @@ data %>%
   filter(userId %in% groups$userId) -> data
 
 # Filter bad trials (as reported by subjects)
-#data$userId <- as.character(data$userId)
-#data <- data[!(data$userId=="69425" & lessonTitle=="Art"),]
+data$userId <- as.character(data$userId)
+data <- data[!(data$userId=="69425" & lessonTitle=="Art"),]
+data$userId <- as.numeric(data$userId)
 
 
 # Filter for reaction times higher than 50 seconds
@@ -142,6 +143,15 @@ sessionData <- sessionData %>%
   inner_join(sessionDataFiltered) %>%
   mutate(usable = if_else(minRank == sessionRank, T, F))
 
+# Group by Clinical Status
+data <- inner_join(data, groups)
+
+# Clean the filtered data set
+cleandata <- inner_join(sessionData, data) %>%
+  filter(usable == T)
+cleandata$userId <- as.character(cleandata$userId)
+cleandata$level_order<- factor(cleandata$lessonTitle, level = c('Pasta','Swahili 1','Flowers','European Capitals 1','Birds', 'Newspapers','Asian Flags', 'Folktales', 'Maps', 'US Towns 1', 'Art', 'Hindu Gods','Cheese')) # order by lessons
+
 
 # Group by clinical status
 clinical <- inner_join(data_avg, groups) %>%
@@ -177,10 +187,9 @@ xlabels <- c("Pasta", "Swahili", "Flowers", "Capitals", "Birds","News", "Flags",
 clinical$user_order<- factor(clinical$userId, level = c('69410','69411','69412','69414','69415','69417','69418','69419','69427','70930','69421','69422','69423','69425','70925', '71203'))
 
 ```
+
+
 ## Data Tables
-
-
-
 
 
 ```{r, echo=FALSE}
@@ -210,6 +219,44 @@ clinical %>%
     "C:/Users/17203/Documents/wonderland/images/cheese.png"
     ), 50, 50)) %>% # Add images to the table 
   kable_paper(full_width = T) 
+
+```
+
+```{r fact, echo=FALSE, fig.cap="Number of facts seen in each lesson"}
+cd1 <-   cleandata %>% 
+  group_by(userId, clinicalStatus, level_order, factAnswer) %>% 
+   summarize(numfacts=length(unique(factAnswer))) 
+
+cd2 <- cd1 %>% 
+  group_by(userId) %>% 
+  summarize(numlessons=length(unique(level_order))) %>%
+  ungroup()
+
+cd3 <- cd1 %>%
+  inner_join(cd2)
+
+
+options(digits=3) 
+
+cd3 %>%
+  group_by(userId, clinicalStatus, numlessons, level_order, factAnswer) %>% 
+  pivot_wider(names_from=factAnswer, values_from = numfacts)%>%
+  replace(is.na(.), 0) %>%
+  mutate(sumfacts = sum(c_across(where(is.numeric))), .after = clinicalStatus) %>%
+  summarize(Avg=(sumfacts))  %>%
+  pivot_wider(names_from=level_order, values_from = Avg) %>%
+  replace(is.na(.), 0) %>%
+  mutate(Avg = ((sum(across(where(is.numeric))))/(numlessons)), .after = numlessons) %>%
+  arrange(clinicalStatus, desc(Avg)) %>%
+  #adorn_totals( where = "row", fill = "-", na.rm = TRUE, name = "Total")%>%
+  kbl(caption= "Number of facts seen in each lesson", col.names = c("Participant", "Group", "Lessons", "AVG", "Pasta", "Swahili", "Flowers", "Capitals", "Birds","News", "Flags", "Folktales", "Maps", "Towns", "Art", "Hindi","Cheese")) %>%
+  kable_styling() %>%
+  #row_spec(which(cd3$Pasta >6),background=ifelse"#f3e8ff") %>%
+  #column_spec(3, background=ifelse(cd3$numlessons >3, "#f3e8ff")) %>%
+  column_spec(4,bold= T,border_right = T) %>%
+  column_spec(3,color="green") %>%
+  #column_spec(4,) %>%
+ kable_paper(full_width = F) 
 
 ```
 
